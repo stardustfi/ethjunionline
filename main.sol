@@ -14,6 +14,7 @@ contract LAN{
     struct Loan {
         address owner;
         address token;
+        address operator;
         // address oracleAddress
         address collectionAddress;
         uint256 nftId;
@@ -31,6 +32,7 @@ contract LAN{
         uint256 bidTime;
         uint256 bidAmount;
         address user;
+        uint256 apr;
         //uint256 ltv;
     }
     mapping(uint256 => mapping(uint256 => Bid)) public bids; // pool id, bid number
@@ -41,21 +43,25 @@ contract LAN{
     uint256 private constant SECONDS_IN_ONE_YEAR = 60*60*24*365;
 
     modifier onlyOwner(uint256 _poolId){
-        require(loans[_poolId].owner == msg.sender, "LAN: not owner");
+        require((loans[_poolId].owner == msg.sender)
+        ||(loans[_poolId].operator == msg.sender), "LAN: not owner");
         _;
     }
 
-    function launch(address _token, address _collectionAddress, uint256 _nftId, uint256 _startTime, uint256 _endTime, uint256 _apr, bool _whitelisted) public {
+
+    function launch(address _operator, address _token, address _collectionAddress, uint256 _nftId, uint256 _startTime, uint256 _endTime, bool _whitelisted) public {
         require(_startTime >= block.timestamp, "LAN: start time in past");
         require(_endTime > _startTime, "LAN: start after end");
         loans[count] = Loan({
-            owner: msg.sender,
+            owner: IERC721(_collectionAddress).ownerOf(_nftId),
+            operator: _operator,
+            //operator can be msg.sender or address(0) if operator role isn't used
             token: _token,
             collectionAddress: _collectionAddress,
             nftId: _nftId,
-            endTime: _endTime,
             startTime: _startTime,
-            apr: _apr,
+            endTime: _endTime,
+            apr: 0,
             numBids: 0,
             whitelisted: _whitelisted
         });
