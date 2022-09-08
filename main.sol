@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.16;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
@@ -16,14 +17,15 @@ contract LAN{
         address token;
         address operator;
         // address oracleAddress
+        uint16 apr;
         address collectionAddress;
         uint256 nftId;
         uint256 startTime;
         uint256 endTime;
-        uint256 apr;
         uint256 numBids;
         //bool liquidatable;
         bool whitelisted;
+        
     }
 
     mapping(uint256 => Loan) public loans;
@@ -32,7 +34,7 @@ contract LAN{
         uint256 bidTime;
         uint256 bidAmount;
         address user;
-        uint256 apr;
+        uint16 apr;
         //uint256 ltv;
     }
     mapping(uint256 => mapping(uint256 => Bid)) public bids; // pool id, bid number
