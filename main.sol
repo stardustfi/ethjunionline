@@ -72,15 +72,16 @@ contract LAN{
         count++;
     }
 
-    function bid(uint256 _poolId, uint256 _amount, uint256 _apr) external {
+    function bid(uint256 _poolId, uint256 _amount, uint16 _apr) external {
         require(_started(_poolId), "LAN: not started");
         require(!_ended(_poolId), "LAN: already ended");
         Loan storage loan = loans[_poolId];
         // check if whitelisted
         require((loan.whitelisted) && (whitelistedAddresses[_poolId][msg.sender])
          || (loan.whitelisted == false), "LAN: Not Whitelisted");
-        uint256 loanValue = _calculateLoanValue(_poolId);
-        require(_amount > loanValue, "LAN: bid not higher");
+        // check latest top bid
+        uint currentTopBid = bids[_poolId][loans.numBids];
+        require(_amount > currentTopBid, "LAN: bid not higher");
         // update with new APR
         loan.apr = _apr;
         // increment bids by 1
