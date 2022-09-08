@@ -54,6 +54,11 @@
 						"internalType": "uint256",
 						"name": "_amount",
 						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "_apr",
+						"type": "uint256"
 					}
 				],
 				"name": "bid",
@@ -90,6 +95,11 @@
 						"internalType": "address",
 						"name": "user",
 						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "apr",
+						"type": "uint256"
 					}
 				],
 				"stateMutability": "view",
@@ -161,6 +171,11 @@
 				"inputs": [
 					{
 						"internalType": "address",
+						"name": "_operator",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
 						"name": "_token",
 						"type": "address"
 					},
@@ -182,11 +197,6 @@
 					{
 						"internalType": "uint256",
 						"name": "_endTime",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "_apr",
 						"type": "uint256"
 					},
 					{
@@ -244,6 +254,11 @@
 					{
 						"internalType": "address",
 						"name": "token",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "operator",
 						"type": "address"
 					},
 					{
@@ -380,10 +395,10 @@
 			]
 		},
 		"main.sol": {
-			"keccak256": "0x32f2b4c9fe3a8dcb2b4fccedc09e56d8ecedb08cc2ef5764c2c1fb674f43d6a3",
+			"keccak256": "0x59e82c5f671ae1cb8a322b8ad8af8a8cbccea14260d7bb7b6f25958e2ef0b084",
 			"urls": [
-				"bzz-raw://8d4347e06093d9f3c3dbaaa360b54976e6173c4b1489d19edc5a9c0fd18093b2",
-				"dweb:/ipfs/QmYUJbGMHqKuUgxpKGtLfvwDyQ3aCC6vP7h4WnLhWyV6Ww"
+				"bzz-raw://37b00583052c722e94d535904a7d18eeb081a517442108f0b03b1a66ade45730",
+				"dweb:/ipfs/QmXgyQcyfuaJgaZhosmM4XR7UscSzVLAFxRX3SVE4orJ3H"
 			]
 		}
 	},

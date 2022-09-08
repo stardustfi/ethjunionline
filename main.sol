@@ -70,29 +70,30 @@ contract LAN{
         count++;
     }
 
-    function bid(uint256 _poolId, uint256 _amount) external {
+    function bid(uint256 _poolId, uint256 _amount, uint256 _apr) external {
         require(_started(_poolId), "LAN: not started");
         require(!_ended(_poolId), "LAN: already ended");
-        Loan memory loan = loans[_poolId];
+        Loan storage loan = loans[_poolId];
+        // check if whitelisted
         require((loan.whitelisted) && (whitelistedAddresses[_poolId][msg.sender])
          || (loan.whitelisted == false), "LAN: Not Whitelisted");
-        // increment bids by 1
-        uint256 numBids = loan.numBids + 1;
-
-        loan.numBids = numBids;
         uint256 loanValue = _calculateLoanValue(_poolId);
         require(_amount > loanValue, "LAN: bid not higher");
+        // update with new APR
+        loan.apr = _apr;
+        // increment bids by 1
+        uint256 numBids = loan.numBids + 1;
         // send tokens to previous bidder
         IERC20(loan.token).transferFrom(msg.sender, bids[_poolId][numBids].user, loanValue);
         // send tokens to owner
         IERC20(loan.token).transferFrom(msg.sender, loan.owner, _amount - loanValue);
         // record data
-
-        
+        loan.numBids = numBids;
         bids[_poolId][numBids] = Bid({
             bidTime: block.timestamp,
             bidAmount: _amount,
-            user: msg.sender
+            user: msg.sender,
+            apr: _apr
             //uint ltv
         });
     }
