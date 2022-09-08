@@ -14,21 +14,29 @@ contract LAN{
     struct Loan {
         address owner;
         address token;
+        // address oracleAddress
         address collectionAddress;
         uint256 nftId;
         uint256 startTime;
         uint256 endTime;
         uint256 apr;
         uint256 numBids;
+        //bool liquidatable;
+        bool whitelisted;
     }
+
     mapping(uint256 => Loan) public loans;
 
     struct Bid {
         uint256 bidTime;
         uint256 bidAmount;
         address user;
+        //uint256 ltv;
     }
     mapping(uint256 => mapping(uint256 => Bid)) public bids; // pool id, bid number
+
+    //whitelist only mode auctionId => bidder address => bool 
+    mapping(uint256 => mapping(address => bool)) public whitelistedAddresses;
 
     uint256 private constant SECONDS_IN_ONE_YEAR = 60*60*24*365;
 
@@ -37,7 +45,7 @@ contract LAN{
         _;
     }
 
-    function launch(address _token, address _collectionAddress, uint256 _nftId, uint256 _startTime, uint256 _endTime, uint256 _apr) public {
+    function launch(address _token, address _collectionAddress, uint256 _nftId, uint256 _startTime, uint256 _endTime, uint256 _apr, bool _whitelisted) public {
         require(_startTime >= block.timestamp, "LAN: start time in past");
         require(_endTime > _startTime, "LAN: start after end");
         loans[count] = Loan({
@@ -48,7 +56,8 @@ contract LAN{
             endTime: _endTime,
             startTime: _startTime,
             apr: _apr,
-            numBids: 0
+            numBids: 0,
+            whitelisted: _whitelisted
         });
         bids[count][0].bidTime = block.timestamp;
         emit newPool(count, _collectionAddress, _nftId);
@@ -59,7 +68,8 @@ contract LAN{
         require(_started(_poolId), "LAN: not started");
         require(!_ended(_poolId), "LAN: already ended");
         Loan memory loan = loans[_poolId];
-
+        require((loan.whitelisted) && (whitelistedAddresses[_poolId][msg.sender])
+         || (loan.whitelisted == false), "LAN: Not Whitelisted");
         // increment bids by 1
         uint256 numBids = loan.numBids + 1;
 
@@ -71,12 +81,31 @@ contract LAN{
         // send tokens to owner
         IERC20(loan.token).transferFrom(msg.sender, loan.owner, _amount - loanValue);
         // record data
+
+        
         bids[_poolId][numBids] = Bid({
             bidTime: block.timestamp,
             bidAmount: _amount,
             user: msg.sender
+            //uint ltv
         });
     }
+    // Update new owner of bid if the right is transferred. 
+    // You could add this to an NFT and then it'd become a promissory note
+    function setNewBidOwner(uint256 _poolId, address _newAddress) external {
+        require(_started(_poolId), "LAN: not started");
+        require(!_ended(_poolId), "LAN: already ended"); 
+        Loan memory loan = loans[_poolId];
+        Bid storage latestBid = bids[_poolId][loan.numBids];
+        require(latestBid.user == msg.sender, "LAN: Not the latest bidder");
+        latestBid.user = _newAddress;
+    }
+    
+    //change whitelist
+    function changeWhitelist(uint256 _poolId, address _newAddress, bool _status) external {
+        whitelistedAddresses[_poolId][_newAddress] = _status;
+    }
+
 
     // cancel if loan hasn't started yet
     function cancel(uint256 _poolId) external onlyOwner(_poolId) {
@@ -107,6 +136,16 @@ contract LAN{
         IERC721 NFT = IERC721(loan.collectionAddress);
         NFT.safeTransferFrom(address(this), msg.sender, loan.nftId);
     }
+
+    // if loan is ongoing, bidder can liquidate early and not worry about repayment
+    // defend against trolling by high bids where pool is, might be excluded tbh
+    function liquidateEarly(uint256 _poolId) external onlyOwner(_poolId) {
+        Loan memory loan = loans[_poolId];
+        Bid memory latestBid = bids[_poolId][loan.numBids];
+        // transfer NFT
+        IERC721 NFT = IERC721(loan.collectionAddress);
+        NFT.safeTransferFrom(address(this), latestBid.user, loan.nftId);
+    }
     
     // calculate latest bid + interest
     function _calculateLoanValue(uint256 _poolId) internal view returns (uint256){
@@ -120,6 +159,8 @@ contract LAN{
         }
         return latestBid.bidAmount + latestBid.bidAmount * loan.apr / 10 ** 18 * timeElapsed / SECONDS_IN_ONE_YEAR;
     }
+
+   
 
     function _ended(uint256 _poolId) internal view returns (bool){
         return loans[_poolId].endTime <= block.timestamp;
