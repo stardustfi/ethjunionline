@@ -80,7 +80,7 @@ contract LAN{
         require((loan.whitelisted) && (whitelistedAddresses[_poolId][msg.sender])
          || (loan.whitelisted == false), "LAN: Not Whitelisted");
         // check latest top bid
-        uint currentTopBid = bids[_poolId][loans.numBids];
+        uint currentTopBid = bids[_poolId][loans.numBids].bidAmount;
         require(_amount > currentTopBid, "LAN: bid not higher");
         // update with new APR
         loan.apr = _apr;
