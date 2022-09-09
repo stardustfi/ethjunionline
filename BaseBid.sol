@@ -7,12 +7,22 @@ interface IChainlink {
 }
 
 contract BaseBid{
+    event newLoan(
+        address collectionAddress,
+        uint16 apr,
+        uint256 poolId,
+        uint256 bidAmount
+    );
+
     address public immutable admin;
     address public immutable baseAsset;
     address public immutable baseAssetOracle;
     address public immutable LANcontracts;
     uint16 public minAPY;
+    bool public windDown;
+    uint256 public longestTerm;
     uint256 public immutable adminFee;
+
 
     modifier onlyOwner(){
         require(msg.sender == admin, "LAN: not owner");
@@ -25,6 +35,7 @@ contract BaseBid{
         address _baseAssetOracle,
         address _LANContract,
         uint16 _minAPY,
+        uint256 _longestTerm,
         uint256 _adminFee
     ) {
         admin = _admin;
@@ -32,6 +43,8 @@ contract BaseBid{
         baseAssetOracle = _baseAssetOracle;
         LANcontracts = _LANContract;
         minAPY = _minAPY;
+        windDown = false;
+        longestTerm = _longestTerm;
         adminFee = _adminFee;
         //infinite token approval for LAN
         IERC20(baseAsset).approve(LANcontract, 0xFFFFFFFF);
@@ -56,12 +69,32 @@ contract BaseBid{
     function removeWhitelist(address _token) external onlyOwner(){
         delete whitelists[_token];
     }
-    //function bidWithParams()
 
+    function deposit(uint256 _tokenAmount) public {
+        IERC20(baseAsset).transferFrom(msg.sender, address(this), _tokenAmount);
+    }
+
+    function withdraw(uint256 _tokenAmount) external onlyOwner(){
+        IERC20(baseAsset).transfer(address(this), msg.sender, _tokenAmount);
+    }
+    function pause() external onlyOwner() {
+        windDown = true;
+    }
+
+    //function bidWithParams()
+    function bidWithParams(uint256 _poolId, uint256 _borrowAmount, uint16 _apr) public {
+        
+    }
+
+    
+    
 
     function automaticBid(uint256 _poolId) external {
-        (,address token, address collectionAddress, uint256 nftId,,,,) = readLoan(_poolId);
+        (,address token,,address collectionAddress, uint256 nftId,,,uint16 apr,,) = readLoan(_poolId);
         require(token == baseAsset, "BaseBid: different base asset");
+        require(apr >= minAPY, "BaseBid: APY below minAPY");
+        require(windDown == false, "BaseBid: No new Bids");
+        // implement erc165 logic to determine multicollateral or single collateral erc20, or erc721 @Junion
         address[] memory tokens = Wrapper.getTokens(nftId);
         uint256[] memory amounts = Wrapper.getAmounts(nftId);
 
@@ -85,18 +118,31 @@ contract BaseBid{
         } else {
             borrowableToken = borrowableUSD / basePrice * 10**(decimals-18);
         }
-        Lan.bid(_poolId, borrowableToken);
+        // automatically set highest possible bid, same APR as previous loan
+        try Lan.bid(_poolId, borrowableToken, apr){
+            emit newLoan(collectionAddress, apr, poolId, bidAmount);
+        } catch {
+            revert("Base Bidding: Loan not executed");
+        }
+        
+        
     }
     
+    function bid(uint256 _poolId) internal {
+        
+    }
+
     function readLoan(uint256 _poolId) view external returns(
         address owner, 
         address token, 
+        address operator,
         address collectionAddress, 
         uint256 nftId, 
         uint256 startTime, 
         uint256 endTime, 
-        uint256 apr, 
-        uint256 numBids) 
+        uint16 apr, 
+        uint256 numBids,
+        bool whitelisted) 
         {
         return(Lan.loans(_poolId));
     }
