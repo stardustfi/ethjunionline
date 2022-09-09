@@ -13,6 +13,7 @@ contract BaseBid{
         uint256 poolId,
         uint256 bidAmount
     );
+    event log(string reason);
 
     address public immutable admin;
     address public immutable baseAsset;
@@ -77,6 +78,19 @@ contract BaseBid{
     function withdraw(uint256 _tokenAmount) external onlyOwner(){
         IERC20(baseAsset).transfer(address(this), msg.sender, _tokenAmount);
     }
+
+    function liquidateAuction(uint256 _poolId) external {
+        
+        try Lan.liquidate(_poolId){
+            (,,,address collectionAddress, uint256 nftId,,,,,) = readLoan(_poolId);
+            IERC721(collectionAddress).approve(admin, nftId);
+            // admin can transfer out at any time. note that admin isn't updated
+        } catch(string memory reason) {
+            emit log(reason);
+        }
+        
+    }
+
     function pause() external onlyOwner() {
         windDown = true;
     }
@@ -86,10 +100,9 @@ contract BaseBid{
         
     }
 
-    
-    
-
     function automaticBid(uint256 _poolId) external {
+        
+        // Assumes the collateral is a wrapped asset so...
         (,address token,,address collectionAddress, uint256 nftId,,,uint16 apr,,) = readLoan(_poolId);
         require(token == baseAsset, "BaseBid: different base asset");
         require(apr >= minAPY, "BaseBid: APY below minAPY");
@@ -121,8 +134,8 @@ contract BaseBid{
         // automatically set highest possible bid, same APR as previous loan
         try Lan.bid(_poolId, borrowableToken, apr){
             emit newLoan(collectionAddress, apr, poolId, bidAmount);
-        } catch {
-            revert("Base Bidding: Loan not executed");
+        } catch(string memory reason) {
+            emit log(reason);
         }
         
         
