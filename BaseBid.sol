@@ -6,6 +6,10 @@ interface IChainlink {
   function latestRoundData() external view returns (uint80 roundId, int answer, uint startedAt, uint updatedAt, uint80 answeredInRound);
 }
 
+interface ILan {
+    //todo
+}
+
 contract BaseBid{
     event newLoan(
         address collectionAddress,
@@ -18,7 +22,7 @@ contract BaseBid{
     address public immutable admin;
     address public immutable baseAsset;
     address public immutable baseAssetOracle;
-    address public immutable LANcontracts;
+    ILan public immutable LAN;
     uint16 public minAPY;
     bool public windDown;
     uint256 public longestTerm;
@@ -42,21 +46,21 @@ contract BaseBid{
         admin = _admin;
         baseAsset = _baseAsset;
         baseAssetOracle = _baseAssetOracle;
-        LANcontracts = _LANContract;
+        LAN = ILan(_LANcontract)
         minAPY = _minAPY;
         windDown = false;
         longestTerm = _longestTerm;
         adminFee = _adminFee;
         //infinite token approval for LAN
-        IERC20(baseAsset).approve(LANcontract, 0xFFFFFFFF);
+        IERC20(baseAsset).approve(_LANcontract, type(uint256).max);
     }
 
-    ILan private constant Lan = ILan(); //insert deployment here
+    ILan private constant Lan = ILan(LANcontract);
     IWrapper private constant Wrapper = IWrapper();
 
     struct Term {
-            uint256 LTV;
-            address oracle;
+        uint256 LTV;
+        address oracle;
     }
     mapping(address => Term) public whitelists;
 
@@ -80,7 +84,6 @@ contract BaseBid{
     }
 
     function liquidateAuction(uint256 _poolId) external {
-        
         try Lan.liquidate(_poolId){
             (,,,address collectionAddress, uint256 nftId,,,,,) = readLoan(_poolId);
             IERC721(collectionAddress).approve(admin, nftId);
@@ -137,8 +140,6 @@ contract BaseBid{
         } catch(string memory reason) {
             emit log(reason);
         }
-        
-        
     }
     
     function bid(uint256 _poolId) internal {
