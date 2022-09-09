@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.16;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
@@ -9,22 +10,35 @@ contract BaseBid{
     address public immutable admin;
     address public immutable baseAsset;
     address public immutable baseAssetOracle;
+    address public immutable LANcontracts;
+    uint16 public minAPY;
     uint256 public immutable adminFee;
 
-    ILan private constant Lan = ILan(); //insert deployment here
-    IWrapper private constant Wrapper = IWrapper();
+    modifier onlyOwner(){
+        require(msg.sender == admin, "LAN: not owner");
+        _;
+    }
 
     constructor(
         address _admin,
         address _baseAsset,
         address _baseAssetOracle,
+        address _LANContract,
+        uint16 _minAPY,
         uint256 _adminFee
     ) {
         admin = _admin;
         baseAsset = _baseAsset;
         baseAssetOracle = _baseAssetOracle;
+        LANcontracts = _LANContract;
+        minAPY = _minAPY;
         adminFee = _adminFee;
+        //infinite token approval for LAN
+        IERC20(baseAsset).approve(LANcontract, 0xFFFFFFFF);
     }
+
+    ILan private constant Lan = ILan(); //insert deployment here
+    IWrapper private constant Wrapper = IWrapper();
 
     struct Term {
             uint256 LTV;
@@ -32,16 +46,18 @@ contract BaseBid{
     }
     mapping(address => Term) public whitelists;
 
-    function addWhitelist(address _token, uint256 _LTV, address _oracle) external {
+    function addWhitelist(address _token, uint256 _LTV, address _oracle) external onlyOwner(){
         whitelists[_token] = Term({
             LTV: _LTV,
             oracle: _oracle
         });
     }
 
-    function removeWhitelist(address _token) external {
+    function removeWhitelist(address _token) external onlyOwner(){
         delete whitelists[_token];
     }
+    //function bidWithParams()
+
 
     function automaticBid(uint256 _poolId) external {
         (,address token, address collectionAddress, uint256 nftId,,,,) = readLoan(_poolId);
@@ -71,8 +87,18 @@ contract BaseBid{
         }
         Lan.bid(_poolId, borrowableToken);
     }
-
-    function readLoan(uint256 _poolId) view returns(address owner, address token, address collectionAddress, uint256 nftId, uint256 startTime, uint256 endTime, uint256 apr, uint256 numBids) {
+    
+    function readLoan(uint256 _poolId) view external returns(
+        address owner, 
+        address token, 
+        address collectionAddress, 
+        uint256 nftId, 
+        uint256 startTime, 
+        uint256 endTime, 
+        uint256 apr, 
+        uint256 numBids) 
+        {
         return(Lan.loans(_poolId));
     }
+
 }
