@@ -9,6 +9,9 @@ interface IChainlink {
 interface ILan {
     //todo
 }
+interface IWrapper {
+    //todo
+}
 
 contract BaseBid{
     event newLoan(
@@ -55,8 +58,7 @@ contract BaseBid{
         IERC20(baseAsset).approve(_LANcontract, type(uint256).max);
     }
 
-    ILan private constant Lan = ILan(LANcontract);
-    IWrapper private constant Wrapper = IWrapper();
+    IWrapper private constant Wrapper = IWrapper(); //add address here
 
     struct Term {
         uint256 LTV;
