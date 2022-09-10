@@ -2,8 +2,15 @@
 pragma solidity ^0.8.16;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+
+
 interface IChainlink {
-  function latestRoundData() external view returns (uint80 roundId, int answer, uint startedAt, uint updatedAt, uint80 answeredInRound);
+  function latestRoundData() external view returns (
+    uint80 roundId, 
+    int answer, 
+    uint startedAt, 
+    uint updatedAt, 
+    uint80 answeredInRound);
 }
 
 contract BaseBid{
@@ -102,7 +109,7 @@ contract BaseBid{
 
     function automaticBid(uint256 _poolId) external {
         
-        // Assumes the collateral is a wrapped asset so...
+        // Assumes the collateral is a wrapped asset
         (,address token,,address collectionAddress, uint256 nftId,,,uint16 apr,,) = readLoan(_poolId);
         require(token == baseAsset, "BaseBid: different base asset");
         require(apr >= minAPY, "BaseBid: APY below minAPY");
