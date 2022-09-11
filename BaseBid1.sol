@@ -8,13 +8,35 @@ interface IPriceOracle {
     uint256 underlyingPrice;    
 }
 
+<<<<<<< HEAD:BaseBid1.sol
 contract BaseBid1 is BaseBidding {
+=======
+interface ILan {
+    //todo
+}
+interface IWrapper {
+    //todo
+}
+
+contract BaseBid{
+    event newLoan(
+        address collectionAddress,
+        uint16 apr,
+        uint256 poolId,
+        uint256 bidAmount
+    );
+>>>>>>> 95c01f77a7f733c1ba201a9572ac880faafcb1ec:BaseBid.sol
     event log(string reason);
 
     address public immutable admin;
     address public immutable baseAsset;
     address public immutable baseAssetOracle;
+<<<<<<< HEAD:BaseBid1.sol
     address public immutable LANcontracts;
+=======
+    ILan public immutable LAN;
+    uint16 public minAPY;
+>>>>>>> 95c01f77a7f733c1ba201a9572ac880faafcb1ec:BaseBid.sol
     bool public windDown;
     uint16 public minAPR;
     uint256 public longestTerm;
@@ -33,15 +55,31 @@ contract BaseBid1 is BaseBidding {
         admin = _admin;
         baseAsset = _baseAsset;
         baseAssetOracle = _baseAssetOracle;
+<<<<<<< HEAD:BaseBid1.sol
         LANcontracts = _LANContract;
         minAPR = _minAPR;
+=======
+        LAN = ILan(_LANcontract)
+        minAPY = _minAPY;
+        windDown = false;
+>>>>>>> 95c01f77a7f733c1ba201a9572ac880faafcb1ec:BaseBid.sol
         longestTerm = _longestTerm;
         adminFee = _adminFee;
         windDown = false;
         //infinite token approval for LAN
-        IERC20(baseAsset).approve(LANcontract, 0xFFFFFFFF);
+        IERC20(baseAsset).approve(_LANcontract, type(uint256).max);
     }
+<<<<<<< HEAD:BaseBid1.sol
     
+=======
+
+    IWrapper private constant Wrapper = IWrapper(); //add address here
+
+    struct Term {
+        uint256 LTV;
+        address oracle;
+    }
+>>>>>>> 95c01f77a7f733c1ba201a9572ac880faafcb1ec:BaseBid.sol
     mapping(address => Term) public whitelists;
 
     function addWhitelist(address _token, uint256 _LTV, address _oracle) external onlyOwner(){
@@ -63,12 +101,17 @@ contract BaseBid1 is BaseBidding {
         IERC20(baseAsset).transferFrom(msg.sender, address(this), _tokenAmount);
     }
 
+<<<<<<< HEAD:BaseBid1.sol
     function pause() external onlyOwner() {
         windDown = true;
     }
     
     function liquidateAuction(uint256 _poolId) public virtual onlyOwner() {
             try Lan.liquidate(_poolId){
+=======
+    function liquidateAuction(uint256 _poolId) external {
+        try Lan.liquidate(_poolId){
+>>>>>>> 95c01f77a7f733c1ba201a9572ac880faafcb1ec:BaseBid.sol
             (,,,address collectionAddress, uint256 nftId,,,,,) = readLoan(_poolId);
             IERC721(collectionAddress).approve(admin, nftId);
             // admin can transfer out at any time. note that admin isn't updated
@@ -117,7 +160,15 @@ contract BaseBid1 is BaseBidding {
     function automaticBid(uint256 _poolId) external shutdown() onlyOwner() {
         (,,,,uint256 nftId,,,uint16 apr,,) = readLoan(_poolId);
         // automatically set highest possible bid, same APR as previous loan
+<<<<<<< HEAD:BaseBid1.sol
         bidWithParams(_poolId, _calculateLTV(nftId), apr);
+=======
+        try Lan.bid(_poolId, borrowableToken, apr){
+            emit newLoan(collectionAddress, apr, poolId, bidAmount);
+        } catch(string memory reason) {
+            emit log(reason);
+        }
+>>>>>>> 95c01f77a7f733c1ba201a9572ac880faafcb1ec:BaseBid.sol
     }
     
 
