@@ -8,7 +8,7 @@ interface IPriceOracle {
     uint256 underlyingPrice;    
 }
 
-contract BaseBid is BaseBidding {
+contract BaseBid1 is BaseBidding {
     event log(string reason);
 
     address public immutable admin;
@@ -62,6 +62,7 @@ contract BaseBid is BaseBidding {
     function withdraw(uint256 _tokenAmount) public virtual {
         IERC20(baseAsset).transferFrom(msg.sender, address(this), _tokenAmount);
     }
+
     function pause() external onlyOwner() {
         windDown = true;
     }
@@ -75,14 +76,13 @@ contract BaseBid is BaseBidding {
             emit log(reason);
         }
     }
-
     //function bidWithParams()
     function bidWithParams(uint256 _poolId, uint256 _borrowAmount, uint16 _apr) public shutdown() onlyOwner(){
         require(_apr >= minAPY, "BaseBid: APY below minAPY");
-        (,address token,,address collectionAddress, uint256 nftId,,,,,) = readLoan(_poolId);
+        (,address token,,address collectionAddress, uint256 nftId,,uint256 endTime,,,) = readLoan(_poolId);
         require(token == baseAsset, "BaseBid: different base asset");
         require(collectionAddress = Wrapper, "BaseBid: Collateral not in a wrapper");
-        require(_calculateLTV(nftId) >= _borrowAmount; "BaseBid: Borrow Amount too high");
+        require(_calculateLTV(nftId, endTime, _apr) >= _borrowAmount; "BaseBid: Borrow Amount too high");
         // automatically set highest possible bid, same APR as previous loan
         try Lan.bid(_poolId, _borrowAmount, apr){
             emit newLoan(collectionAddress, apr, poolId, bidAmount);
@@ -91,7 +91,7 @@ contract BaseBid is BaseBidding {
         }
     }
 
-    function _calculateLTV(uint256 nftId) internal returns(uint maxBorrowable) {
+    function _calculateLTV(uint256 nftId, uint256 endTime, uint16 apr) internal returns(uint maxBorrowable) {
         address[] memory tokens = Wrapper.getTokens(nftId);
         uint256[] memory amounts = Wrapper.getAmounts(nftId);
         whitelists[tokens[i]]
@@ -100,13 +100,18 @@ contract BaseBid is BaseBidding {
         uint256 length = tokens.length;
         for (uint256 i=0; i < length;) {
             Whitelist memory whitelist = whitelists[tokens[i]];
-            // getUnderlyingPrice returns price in 18 decimals and USD
-            uint256 collateralPrice = IPriceOracle(whitelist.oracle).getUnderlyingPrice(tokens[i]);
-            borrowableUSD += amounts[i] * whitelist[token].LTV * collateralPrice / 10**26;
+            // Check if token is on whitelist - skip if not
+            if(whitelist.oracle != address(0)){
+                // getUnderlyingPrice returns price in 18 decimals and USD
+                uint256 collateralPrice = IPriceOracle(whitelist.oracle).getUnderlyingPrice(tokens[i]);
+                borrowableUSD += amounts[i] * whitelist[token].LTV * collateralPrice / 10**26;
+            }
             unchecked{++i;}
         }
+        uint256 elapsedTime = endTime - block.timestamp;
         uint256 basePrice = IPriceOracle(baseAssetOracle).getUnderlyingPrice(baseAsset);
-        uint256 maxBorrowable = borrowableUSD/basePrice;
+        uint256 loanValue = _calculateLoanValue(borrowableUSD, elapsedTime, apr);
+        uint256 maxBorrowable = loanValue/basePrice;
     }
 
     function automaticBid(uint256 _poolId) external shutdown() onlyOwner() {

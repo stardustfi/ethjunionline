@@ -13,7 +13,6 @@ abstract contract BaseBidding {
     );
 
     event log(string reason);
-
     address public immutable admin;
     address public immutable baseAsset;
     address public immutable baseAssetOracle;
@@ -22,7 +21,8 @@ abstract contract BaseBidding {
     uint16 public minAPR;
     uint256 public longestTerm;
     uint256 public immutable adminFee;
-    
+    uint256 private constant SECONDS_IN_ONE_YEAR = 60*60*24*365;
+
     struct Term {
             uint256 poolId;
             uint256 LTV;
@@ -55,7 +55,7 @@ abstract contract BaseBidding {
         longestTerm = _longestTerm;
         adminFee = _adminFee;
     }
-
+    
     function deposit(uint256 _tokenAmount) public virtual {}
 
     function withdraw(uint256 _tokenAmount) public virtual onlyOwner(){}
@@ -71,11 +71,15 @@ abstract contract BaseBidding {
 
     function bidWithParams(uint256 _poolId, uint256 _borrowAmount, uint16 _apr) public virtual {}
 
-    function automaticBid(uint256 _poolId) external virtual {}
+    function automaticBid(uint256 _poolId) public virtual {}
     
     function pause() external virtual onlyOwner() {}
     
     function _calculateLTV(uint256 _poolId) internal virtual{}
+
+    function _calculateLoanValue(uint256 _presentValue, uint256 _apr, uint256 _timeElapsed) public pure virtual returns(uint256) {
+        return _presentValue + _presentValue * _apr / 10 ** 18 * _timeElapsed / SECONDS_IN_ONE_YEAR;
+    }
     
     function readLoan(uint256 _poolId) view virtual external returns(
         address owner, 
