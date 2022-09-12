@@ -3,6 +3,7 @@ pragma solidity ^0.8.16;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "/BaseBidding.sol";
+import "/Utilization.sol";
 
 interface IPriceOracle {
     uint256 underlyingPrice;    
@@ -15,7 +16,7 @@ interface IWrapper {
     //todo
 }
 
-contract BaseBid{
+contract BaseBid1 is BaseBidding, Utilization {
     event newLoan(
         address collectionAddress,
         uint16 apr,
