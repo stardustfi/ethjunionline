@@ -139,16 +139,16 @@ contract LAN{
         latestBid.user = _newAddress;
     }
     
-    function changeWhitelist(uint256 _poolId, bool _whitelist) external onlyOwner() {
+    // Enable/Disable Whitelist mode
+    function whitelistStatusUpdate(uint256 _poolId, bool _whitelist) external onlyOwner() {
         Loan storage loan = loans[_poolId];
         loan.whitelisted = _whitelist;
     }
-    
 
+    // Change Whitelist members
     function changeWhitelist(uint256 _poolId, address _newAddress, bool _status) external {
         whitelistedAddresses[_poolId][_newAddress] = _status;
     }
-
 
     // cancel if loan hasn't started yet
     function cancel(uint256 _poolId) external onlyOwner(_poolId) {
@@ -188,6 +188,7 @@ contract LAN{
         emit loanEnded(_poolId);
         delete loan;
     }
+
     // Check if liquidated.
     function _liquidate(Loan calldata loan, Bid calldata latestBid, uint256 _poolId) internal returns (bool){
         uint256 currentPrice = ILiquidationOracle(loan.oracleAddress).getUnderlyingPrice(loan.collectionAddress)/ILiquidationOracle(loan.oracleAddress).getUnderlyingPrice(loan.token);
