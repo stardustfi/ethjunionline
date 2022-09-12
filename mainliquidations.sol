@@ -26,9 +26,9 @@ contract LAN{
         address owner;
         address token;
         address operator;
-        address oracleAddress;
-        uint16 apr;
+        address oracleAddress;        
         address collectionAddress;
+        uint256 apr;
         uint256 nftId;
         uint256 startTime;
         uint256 endTime;
@@ -45,7 +45,7 @@ contract LAN{
         uint256 bidTime;
         uint256 bidAmount;
         address user;
-        uint16 apr;
+        uint256 apr;
         uint16 ltv;
     }
     mapping(uint256 => mapping(uint256 => Bid)) public bids; // pool id, bid number
@@ -98,7 +98,7 @@ contract LAN{
         count++;
     }
 
-    function bid(uint256 _poolId, uint256 _amount, uint16 _apr, uint16 _ltv) external {
+    function bid(uint256 _poolId, uint256 _amount, uint256 _apr, uint16 _ltv) external {
         require(_started(_poolId), "LAN: not started");
         require(!_ended(_poolId), "LAN: already ended");
         Loan storage loan = loans[_poolId];

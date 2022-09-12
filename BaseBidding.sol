@@ -18,7 +18,7 @@ abstract contract BaseBidding {
     address public immutable baseAssetOracle;
     address public immutable LANcontracts;
     bool public windDown;
-    uint16 public minAPR;
+    uint256 public minAPR;
     uint256 public longestTerm;
     uint256 public immutable adminFee;
     uint256 private constant SECONDS_IN_ONE_YEAR = 60*60*24*365;
@@ -69,7 +69,7 @@ abstract contract BaseBidding {
     
     function liquidateAuction(uint256 _poolId) public virtual {}
 
-    function bidWithParams(uint256 _poolId, uint256 _borrowAmount, uint16 _apr) public virtual {}
+    function bidWithParams(uint256 _poolId, uint256 _borrowAmount, uint256 _apr) public virtual {}
 
     function automaticBid(uint256 _poolId) public virtual {}
     
@@ -85,12 +85,14 @@ abstract contract BaseBidding {
         address owner, 
         address token, 
         address operator,
+        address oracleAddress;        
         address collectionAddress, 
         uint256 nftId, 
         uint256 startTime, 
         uint256 endTime, 
-        uint16 apr, 
+        uint256 apr, 
         uint256 numBids,
+        bool liquidatable,
         bool whitelisted) 
         {
         return(Lan.loans(_poolId));

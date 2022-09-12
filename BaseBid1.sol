@@ -15,7 +15,7 @@ interface ILan {
 interface IWrapper {
     //todo
 }
-
+// CompoundV3
 contract BaseBid1 is BaseBidding, Utilization {
     event newLoan(
         address collectionAddress,
@@ -31,17 +31,22 @@ contract BaseBid1 is BaseBidding, Utilization {
     ILan public immutable LAN;
     uint16 public minAPY;
     bool public windDown;
-    uint16 public minAPR;
+    uint16 public kink;
+    // integere, 80% util is 80 kink
+    uint256 public minAPR;
+    uint256 public cash;
     uint256 public longestTerm;
     uint256 public immutable adminFee;
     ILan private constant Lan = ILan(); //insert deployment here
     IWrapper private constant Wrapper = IWrapper();
+
     constructor(
         address _admin,
         address _baseAsset,
         address _baseAssetOracle,
         address _LANContract,
-        uint16 _minAPR,
+        uint16 _kink,
+        uint256 _minAPR,
         uint256 _longestTerm,
         uint256 _adminFee
     ) BaseBidding(_admin, _baseAsset, _baseAssetOracle, _LANContract, _minAPR, _longestTerm, _adminFee){
@@ -49,6 +54,7 @@ contract BaseBid1 is BaseBidding, Utilization {
         baseAsset = _baseAsset;
         baseAssetOracle = _baseAssetOracle;
         LAN = ILan(_LANcontract)
+        kink = _kink;
         minAPY = _minAPY;
         windDown = false;
         longestTerm = _longestTerm;
@@ -79,6 +85,7 @@ contract BaseBid1 is BaseBidding, Utilization {
     
     function deposit(uint256 _tokenAmount) public virtual shutdown() {
         IERC20(baseAsset).transferFrom(msg.sender, address(this), _tokenAmount);
+        cash += _tokenAmount;
     }
 
     function withdraw(uint256 _tokenAmount) public virtual {
@@ -99,7 +106,7 @@ contract BaseBid1 is BaseBidding, Utilization {
         }
     }
     //function bidWithParams()
-    function bidWithParams(uint256 _poolId, uint256 _borrowAmount, uint16 _apr) public shutdown() onlyOwner(){
+    function bidWithParams(uint256 _poolId, uint256 _borrowAmount, uint256 _apr) public shutdown() onlyOwner(){
         require(_apr >= minAPY, "BaseBid: APY below minAPY");
         (,address token,,address collectionAddress, uint256 nftId,,uint256 endTime,,,) = readLoan(_poolId);
         require(token == baseAsset, "BaseBid: different base asset");
@@ -108,12 +115,13 @@ contract BaseBid1 is BaseBidding, Utilization {
         // automatically set highest possible bid, same APR as previous loan
         try Lan.bid(_poolId, _borrowAmount, apr){
             emit newLoan(collectionAddress, apr, poolId, bidAmount);
+            _utilization();
         } catch(string memory reason) {
             emit log(reason);
         }
     }
 
-    function _calculateLTV(uint256 nftId, uint256 endTime, uint16 apr) internal returns(uint maxBorrowable) {
+    function _calculateLTV(uint256 nftId, uint256 endTime, uint256 apr) internal returns(uint maxBorrowable) {
         address[] memory tokens = Wrapper.getTokens(nftId);
         uint256[] memory amounts = Wrapper.getAmounts(nftId);
         whitelists[tokens[i]]
@@ -137,12 +145,24 @@ contract BaseBid1 is BaseBidding, Utilization {
     }
 
     function automaticBid(uint256 _poolId) external shutdown() onlyOwner() {
-        (,,,,uint256 nftId,,,uint16 apr,,) = readLoan(_poolId);
+        (,,,,uint256 nftId,,,uint256 apr,,) = readLoan(_poolId);
         // automatically set highest possible bid, same APR as previous loan
         bidWithParams(_poolId, _calculateLTV(nftId), apr);
     }
     
+    function _utilization() internal {
+        // compound Jump rate Model kinda
+        uint256 reserves = IERC20(baseAsset).balanceOf(address(this);
+        uint16 util = reserves/cash;
+        if(util <= kink) {
+            // Increase minAPR with utilization linearly
+            minAPR += util * 10**19;
+        } else {
+            // Change linear slope by 10x
+            minAPR += util * 10**20;
+        }
 
+    }
 
 }
 
