@@ -2,14 +2,17 @@
 pragma solidity ^0.8.16;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "ILiquidationOracle.sol";
+import "IPriceOracle.sol";
 
+/// @title LAN: unopinianated lending infrastructure for literally any nft
+/// @author William, Junion, Austin
+/// @notice Code is really rough and likely contains bugs :)
 interface IPriceOracle {
     uint256 price;
 }
 
 contract LAN{
-    // unopinianated lending infrastructure
+
     event newPool(
         uint256 indexed poolId,
         address collectionAddress,
@@ -20,8 +23,10 @@ contract LAN{
     event loanEnded(
         uint256 poolId
     )
-
+    ///
     uint256 public count;
+
+
     struct Loan {
         address owner;
         address token;
@@ -48,12 +53,14 @@ contract LAN{
         uint256 apr;
         uint16 ltv;
     }
-    mapping(uint256 => mapping(uint256 => Bid)) public bids; // pool id, bid number
 
-    //whitelist only mode auctionId => bidder address => bool 
+    /// @notice Mapping from PoolID => Bid Number => Bid. Keep track of bids
+    mapping(uint256 => mapping(uint256 => Bid)) public bids;
+
+    /// @notice Mapping from PoolID => Bidder Address => bool. True = Whitelisted, False = not. Wh
     mapping(uint256 => mapping(address => bool)) public whitelistedAddresses;
 
-    // auctionId => unwithdrawn but lent user funds
+    /// @notice Mapping from PoolID => User Funds. Tracks repayments from users. Funds aren't transferred to the borrower, but are kept.
     mapping(uint256 => uint256) public userPoolReserve;
 
     uint256 private constant SECONDS_IN_ONE_YEAR = 60*60*24*365;
