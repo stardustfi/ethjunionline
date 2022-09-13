@@ -2,14 +2,17 @@
 pragma solidity ^0.8.16;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "ILiquidationOracle.sol";
+import "IPriceOracle.sol";
 
+/// @title LAN: unopinianated lending infrastructure for literally any nft
+/// @author William, Junion, Austin
+/// @notice Code is really rough and likely contains bugs :)
 interface IPriceOracle {
     uint256 price;
 }
 
 contract LAN{
-    // unopinianated lending infrastructure
+
     event newPool(
         uint256 indexed poolId,
         address collectionAddress,
@@ -20,15 +23,17 @@ contract LAN{
     event loanEnded(
         uint256 poolId
     )
-
+    ///
     uint256 public count;
+
+
     struct Loan {
         address owner;
         address token;
         address operator;
-        address oracleAddress;
-        uint16 apr;
+        address oracleAddress;        
         address collectionAddress;
+        uint256 apr;
         uint256 nftId;
         uint256 startTime;
         uint256 endTime;
@@ -45,15 +50,17 @@ contract LAN{
         uint256 bidTime;
         uint256 bidAmount;
         address user;
-        uint16 apr;
+        uint256 apr;
         uint16 ltv;
     }
-    mapping(uint256 => mapping(uint256 => Bid)) public bids; // pool id, bid number
 
-    //whitelist only mode auctionId => bidder address => bool 
+    /// @notice Mapping from PoolID => Bid Number => Bid. Keep track of bids
+    mapping(uint256 => mapping(uint256 => Bid)) public bids;
+
+    /// @notice Mapping from PoolID => Bidder Address => bool. True = Whitelisted, False = not. Wh
     mapping(uint256 => mapping(address => bool)) public whitelistedAddresses;
 
-    // auctionId => unwithdrawn but lent user funds
+    /// @notice Mapping from PoolID => User Funds. Tracks repayments from users. Funds aren't transferred to the borrower, but are kept.
     mapping(uint256 => uint256) public userPoolReserve;
 
     uint256 private constant SECONDS_IN_ONE_YEAR = 60*60*24*365;
@@ -98,7 +105,7 @@ contract LAN{
         count++;
     }
 
-    function bid(uint256 _poolId, uint256 _amount, uint16 _apr, uint16 _ltv) external {
+    function bid(uint256 _poolId, uint256 _amount, uint256 _apr, uint16 _ltv) external {
         require(_started(_poolId), "LAN: not started");
         require(!_ended(_poolId), "LAN: already ended");
         Loan storage loan = loans[_poolId];
