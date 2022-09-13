@@ -69,7 +69,7 @@ contract BaseBid1 is BaseBidding, Utilization {
         admin = _admin;
         baseAsset = _baseAsset;
         baseAssetOracle = _baseAssetOracle;
-        LAN = ILan(_LANcontract)
+        LAN = ILan(_LANcontract);
         kink = _kink;
         minAPY = _minAPY;
         windDown = false;
@@ -144,7 +144,7 @@ contract BaseBid1 is BaseBidding, Utilization {
     function bidWithParams(uint256 _poolId, uint256 _borrowAmount, uint256 _apr) public shutdown() onlyOwner(){
         require(_apr >= minAPY, "BaseBid: APY below minAPY");
         (,address token,,address collectionAddress, uint256 nftId,,uint256 endTime,,bool liquidatable,) = readLoan(_poolId);
-        require(liquidatable == true, "Basebid: Liquidatable not true")
+        require(liquidatable == true, "Basebid: Liquidatable not true");
         require(token == baseAsset, "BaseBid: different base asset");
         require(collectionAddress = Wrapper, "BaseBid: Collateral not in a wrapper");
         require(_calculateLTV(nftId, endTime, _apr) >= _borrowAmount; "BaseBid: Borrow Amount too high");
