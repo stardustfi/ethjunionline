@@ -2,14 +2,12 @@
 pragma solidity ^0.8.16;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "/IPriceOracle.sol";
+import "/contracts/IPriceOracle.sol";
 
 /// @title LAN: unopinianated lending infrastructure for literally any nft
 /// @author William, Junion, Austin
 /// @notice Code is really rough and likely contains bugs :)
-interface IPriceOracle {
-    uint256 price;
-}
+
 
 contract LAN {
     event newPool(
@@ -153,20 +151,16 @@ contract LAN {
         // Check the latest bid, calculate by PV (including accrued interest)
         uint256 loanValue = _calculateLoanValue(_poolId);
         require(_amount > loanValue, "LAN: bid not higher");
-        Bid newBid = Bid({
+        Bid memory newBid = Bid({
             bidTime: block.timestamp,
             bidAmount: _amount,
             user: msg.sender,
             apr: _apr,
             ltv: _ltv
         });
-        // Check if loan will be liquidated immediately if liquidatable param is turned on.
-        assert(
-            (_liquidate(loan, newBid, _poolId) && loan.liquidatable),
-            "LAN: Loan is liquidated immediately"
-        );
+
         // Update and transfer tokens to right people.
-        bids[_poolId][numBids] = newBid;
+        bids[_poolId][loan.numBids] = newBid;
         loan.apr = _apr;
         uint256 numBids = loan.numBids + 1;
         loan.numBids = numBids;
@@ -199,7 +193,7 @@ contract LAN {
     /// @param _whitelist status. True = Whitelist, False = no Whitelist
     function whitelistStatusUpdate(uint256 _poolId, bool _whitelist)
         external
-        onlyOwner
+        onlyOwner(_poolId)
     {
         Loan storage loan = loans[_poolId];
         loan.whitelisted = _whitelist;
@@ -276,9 +270,9 @@ contract LAN {
         Bid calldata latestBid,
         uint256 _poolId
     ) internal returns (bool) {
-        uint256 currentPrice = ILiquidationOracle(loan.oracleAddress)
+        uint256 currentPrice = IPriceOracle(loan.oracleAddress)
             .getUnderlyingPrice(loan.collectionAddress) /
-            ILiquidationOracle(loan.oracleAddress).getUnderlyingPrice(
+            IPriceOracle(loan.oracleAddress).getUnderlyingPrice(
                 loan.token
             );
         if (
