@@ -10,15 +10,17 @@ import "/Utilization.sol";
 /// @author William, Junion
 /// @notice Code is really rough and likely contains bugs :)
 interface IPriceOracle {
-    uint256 underlyingPrice;    
-    
+    // Standardize oracle output
+    // Return price of asset in WETH terms, (1e18)
+    function getUnderlyingPrice(address underlying) external view returns (uint256);    
 }
 
 interface ILan {
     //todo
 }
 interface IWrapper {
-    //todo
+    function getAmounts(uint256 _nftId) public view returns (uint256[] memory) {}
+    function getTokens(uint256 _nftId) public view returns (address[] memory) {}
 }
 contract BaseBid1 is BaseBidding, Utilization {
     event newLoan(
