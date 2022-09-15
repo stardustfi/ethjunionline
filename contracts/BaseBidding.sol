@@ -72,12 +72,8 @@ abstract contract BaseBidding {
     /// @param _token is token address
     /// @param _LTV is the LTV of the asset
     /// @param _oracle is the oracle that will be queried. Oracle should implement IPriceOracle
-    function addWhitelist(address _token, uint256 _LTV, address _oracle) public virtual onlyOwner(){
-        whitelists[_token] = Term({
-            LTV: _LTV,
-            oracle: _oracle
-        });
-    }
+    function addWhitelist(address _token, uint256 _LTV, address _oracle) public virtual onlyOwner(){}
+    
 
     /// @notice Liquidate Auction if the auction can be liquidated.
     /// @param _poolId The pool ID
@@ -101,7 +97,6 @@ abstract contract BaseBidding {
     /// @notice Sum the value of whitelisted assets contained in the NFT wrapper. Nonwhitelisted assets are 0.
     /// @param _presentValue The loan amount
     /// @param _apr The APR of the loan
-    /// @param _poolId The time to maturity of the loan
     /// @return futurevalue The final accrued value of the loan
     function _calculateLoanValue(uint256 _presentValue, uint256 _apr, uint256 _timeElapsed) public pure virtual returns(uint256) {
         return _presentValue + _presentValue * _apr / 10 ** 18 * _timeElapsed / SECONDS_IN_ONE_YEAR;
