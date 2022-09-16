@@ -271,7 +271,7 @@ contract LAN {
         uint256 _poolId
     ) internal view returns (bool) {
         uint256 currentPrice = IPriceOracle(loan.oracleAddress)
-            .getUnderlyingPrice(loan.collectionAddress) /
+            .getBundlePrice(loan.collectionAddress, loan.nftId) /
             IPriceOracle(loan.oracleAddress).getUnderlyingPrice(
                 loan.token
             );

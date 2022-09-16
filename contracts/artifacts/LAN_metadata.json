@@ -596,11 +596,11 @@
 			]
 		},
 		"contracts/mainliquidations.sol": {
-			"keccak256": "0xbdb24287b36b7cbbc07966d0498cf2cf1c0481070b39fe2360bb733eef3b36f2",
+			"keccak256": "0xd828af9e86f2715e2dd93bf557fe2260f5c82e066641030e935b2feb76153af0",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://6cd83432ef7ca47dc8ab2df2ca6d10681f3bbb026f1dade69cf8c63b65844db4",
-				"dweb:/ipfs/Qmc7KvTrgWTqhVkL56A7dAb9CGYVBPcr8hz4EAg9CMcnv9"
+				"bzz-raw://c74feb76e2c295a02af23bf161c037f94fd562bc93a09e5f133814944a106a69",
+				"dweb:/ipfs/QmWyVkGCbSqKSy2mApjoNUnMFdGRmcXkWaxQdJeGa7Stib"
 			]
 		}
 	},
