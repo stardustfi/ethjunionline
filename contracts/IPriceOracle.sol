@@ -5,4 +5,5 @@ interface IPriceOracle {
     // Standardize oracle output
     // Return price of asset in WETH terms, (1e18)
     function getUnderlyingPrice(address underlying) external view returns (uint256);
+    function getBundlePrice(address wrapper, uint256 nftId) external view returns(uint256);
 }

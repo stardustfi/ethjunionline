@@ -1,0 +1,89 @@
+{
+	"compiler": {
+		"version": "0.8.17+commit.8df45f5f"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "wrapper",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "nftId",
+						"type": "uint256"
+					}
+				],
+				"name": "getBundlePrice",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "underlying",
+						"type": "address"
+					}
+				],
+				"name": "getUnderlyingPrice",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"contracts/IPriceOracle.sol": "IPriceOracle"
+		},
+		"evmVersion": "london",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"contracts/IPriceOracle.sol": {
+			"keccak256": "0xdabed1b1214f7f821fb9833d6d5eb4b92ac18eacb5db83222235eaf9fb17e24d",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://63fb1f83980a5e691e8066322a18202d004191c536af9360d8d612a8915a1f45",
+				"dweb:/ipfs/QmSZ6bwaEjRsCeYnmbkYgY6ZSW3pqmXYPE7jLv2WBqCo5W"
+			]
+		}
+	},
+	"version": 1
+}

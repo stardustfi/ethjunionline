@@ -3,6 +3,29 @@ pragma solidity ^0.8.16;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+//import "/contracts/mainliquidations.sol";
+
+interface ILAN {
+    struct Loan {
+        address owner;
+        address token;
+        address operator;
+        address oracleAddress;
+        address collectionAddress;
+        uint256 apr;
+        uint256 nftId;
+        uint256 startTime;
+        uint256 endTime;
+        uint256 numBids;
+        // True if liquidatable, False if not
+        bool liquidatable;
+        // True if whitelisted mode on, False if not
+        bool whitelisted;
+    }
+    /// @notice Keeping track of loans. PoolId => loans
+    mapping(uint256 => Loan) public loans;
+
+}
 
 abstract contract BaseBidding {
     event newLoan(
@@ -11,12 +34,15 @@ abstract contract BaseBidding {
         uint256 poolId,
         uint256 bidAmount
     );
+    
+    
 
     event log(string reason);
     address public immutable admin;
     address public immutable baseAsset;
     address public immutable baseAssetOracle;
-    address public immutable LANcontracts;
+    ILan public immutable LAN;
+    // Can't figure out how to resolve this error
     bool public liquidationOnly;
     bool public windDown;
     uint256 public minAPR;
@@ -53,7 +79,7 @@ abstract contract BaseBidding {
         admin = _admin;
         baseAsset = _baseAsset;
         baseAssetOracle = _baseAssetOracle;
-        LANcontracts = _LANContract;
+        LAN = _LANContract;
         liquidationOnly = _liquidationOnly;
         minAPR = _minAPR;
         longestTerm = _longestTerm;
@@ -118,6 +144,6 @@ abstract contract BaseBidding {
         bool liquidatable,
         bool whitelisted) 
         {
-        return(Lan.loans(_poolId));
+        return(LANContracts.loans(_poolId));
     }
 }

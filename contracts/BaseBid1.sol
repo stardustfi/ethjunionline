@@ -2,8 +2,7 @@
 pragma solidity ^0.8.16;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "/BaseBidding.sol";
-import "/Utilization.sol";
+import "/contracts/BaseBidding.sol";
 
 /// @notice Base implementation of BaseBid, similar to Compound V3
 /// @title BaseBid1
@@ -16,7 +15,6 @@ interface IPriceOracle {
 }
 
 interface ILan {
-    
     function bid(uint256 _poolId, uint256 _amount, uint256 _apr, uint16 _ltv) external {}
     function liquidate(uint256 _poolId) external {}
 }
@@ -85,7 +83,6 @@ contract BaseBid1 is BaseBidding {
         IERC20(baseAsset).approve(_LANcontract, type(uint256).max);
     }
 
-    IWrapper private constant Wrapper = IWrapper(); //add address here
 
     struct Term {
         uint256 LTV;
@@ -132,7 +129,7 @@ contract BaseBid1 is BaseBidding {
     /// Owner can withdraw at any time, but if admin is changed, the approval isn't updated.
     /// @param _poolId The pool ID
     function liquidateAuction(uint256 _poolId) public virtual onlyOwner() {
-            try Lan.liquidate(_poolId){
+            try LAN.liquidate(_poolId){
             (,,,address collectionAddress, uint256 nftId,,,,,,) = readLoan(_poolId);
             IERC721(collectionAddress).approve(admin, nftId);
         } catch(string memory reason) {
@@ -151,8 +148,8 @@ contract BaseBid1 is BaseBidding {
         require(liquidatable == true, "Basebid: Liquidatable not true");
         require(token == baseAsset, "BaseBid: different base asset");
         require(collectionAddress = Wrapper, "BaseBid: Collateral not in a wrapper");
-        require(_calculateLTV(nftId, endTime, _apr) >= _borrowAmount; "BaseBid: Borrow Amount too high");
-        try Lan.bid(_poolId, _borrowAmount, apr){
+        require(_calculateLTV(nftId, endTime, _apr) >= _borrowAmount, "BaseBid: Borrow Amount too high");
+        try LAN.bid(_poolId, _borrowAmount, apr){
             emit newLoan(collectionAddress, apr, poolId, bidAmount);
             _utilization();
         } catch(string memory reason) {
@@ -161,13 +158,13 @@ contract BaseBid1 is BaseBidding {
     }
 
     /// @notice Sum the value of whitelisted assets contained in the NFT wrapper. Nonwhitelisted assets are 0.
-    /// @param _nftID The ID of the NFT for the wrapper contract
-    /// @param _borrowAmount The amount requested to borrow
-    /// @param _apr The APR for the borrow
-    function _calculateLTV(uint256 nftId, uint256 endTime, uint256 apr) internal returns(uint maxBorrowable) {
+    /// @param nftId The ID of the NFT for the wrapper contract
+    /// @param endTime The amount requested to borrow
+    /// @param apr The APR for the borrow
+    function _calculateLTV(uint256 nftId, uint256 endTime, uint256 apr) internal returns(uint) {
         address[] memory tokens = Wrapper.getTokens(nftId);
         uint256[] memory amounts = Wrapper.getAmounts(nftId);
-        whitelists[tokens[i]]
+        whitelists[tokens[i]];
         // loop through all assets and calculate borrowable USD
         uint256 borrowableUSD; // 18 decimal places
         uint256 length = tokens.length;
@@ -184,7 +181,7 @@ contract BaseBid1 is BaseBidding {
         uint256 elapsedTime = endTime - block.timestamp;
         uint256 basePrice = IPriceOracle(baseAssetOracle).getUnderlyingPrice(baseAsset);
         uint256 loanValue = _calculateLoanValue(borrowableUSD, elapsedTime, apr);
-        uint256 maxBorrowable = loanValue/basePrice;
+        return loanValue/basePrice;
     }
 
     /// @notice Automatically bid the highest possible bid, using bidWithParams
@@ -197,7 +194,8 @@ contract BaseBid1 is BaseBidding {
     /// @notice Change the minAPR based on the # of assets deposited (cash), and # of assets currently inside (reserves)
     function _utilization() internal {
         // compound Jump rate Model kinda
-        uint256 reserves = IERC20(baseAsset).balanceOf(address(this);
+
+        uint256 reserves = IERC20(baseAsset).balanceOf(address(this));
         uint16 util = reserves/cash;
         if(util <= kink) {
             // Increase minAPR with utilization linearly

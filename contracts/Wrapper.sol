@@ -8,24 +8,24 @@ contract Wrapper is ERC721{
     uint256 public count;
 
     struct Container {
-        address[] tokens,
-        uint256[] amounts
+        address[] tokens;
+        uint256[] amounts;
     }
     
     /// @notice map count to Container struct
-    mapping(uint256 => Container) public contained;
+    mapping(uint256 => Container) internal contained;
 
-    constructor() public ERC721("LanBundle", "LAN") {}
+    constructor() ERC721("LanBundle", "LAN") {}
     /// @notice No direct erc721 native support, just wrap 721 in an erc20 to support
     function wrap(address[] calldata _tokens, uint256[] calldata _amounts) external {
         require(_tokens.length == _amounts.length, "Wrapper: Not equal lengths");
-        uint256 length = _tokens.length
+        uint256 length = _tokens.length;
         for (uint256 i=0; i < length;) {
             // getUnderlyingPrice returns price in 18 decimals and USD
             IERC20(_tokens[i]).transferFrom(msg.sender, address(this), _amounts[i]);
             unchecked{++i;}
         }
-        contained[count] = Container(_token, _amounts);
+        contained[count] = Container(_tokens, _amounts);
         _mint(msg.sender, count++);
     }
 
@@ -36,15 +36,15 @@ contract Wrapper is ERC721{
     }
     
     function getAmounts(uint256 _nftId) public view returns (uint256[] memory) {
-        return contained[_nftId].tokens;
+        return contained[_nftId].amounts;
     }
 
     function burnAndRedeem(uint256 _nftId) external {
         _burn(_nftId);
-        _amounts = getAmounts(_nftId);
-        _tokens = getTokens(_nftId);
+        uint[] memory _amounts = getAmounts(_nftId);
+        address[] memory _tokens = getTokens(_nftId);
         delete contained[_nftId];
-        uint256 length = _tokens.length
+        uint256 length = _tokens.length;
         for (uint256 i=0; i < length;) {
             // getUnderlyingPrice returns price in 18 decimals and USD
             IERC20(_tokens[i]).transferFrom(address(this), msg.sender, _amounts[i]);

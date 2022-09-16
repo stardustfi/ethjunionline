@@ -266,10 +266,10 @@ contract LAN {
     /// @param latestBid the latest bid
     /// @param _poolId pool Id
     function _liquidate(
-        Loan calldata loan,
-        Bid calldata latestBid,
+        Loan memory loan,
+        Bid memory latestBid,
         uint256 _poolId
-    ) internal returns (bool) {
+    ) internal view returns (bool) {
         uint256 currentPrice = IPriceOracle(loan.oracleAddress)
             .getUnderlyingPrice(loan.collectionAddress) /
             IPriceOracle(loan.oracleAddress).getUnderlyingPrice(

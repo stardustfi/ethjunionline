@@ -1,0 +1,608 @@
+{
+	"compiler": {
+		"version": "0.8.17+commit.8df45f5f"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "Id",
+						"type": "uint256"
+					}
+				],
+				"name": "loanCancelled",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "poolId",
+						"type": "uint256"
+					}
+				],
+				"name": "loanEnded",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "uint256",
+						"name": "poolId",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "address",
+						"name": "collectionAddress",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "nftId",
+						"type": "uint256"
+					}
+				],
+				"name": "newPool",
+				"type": "event"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "_poolId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "_amount",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "_apr",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint16",
+						"name": "_ltv",
+						"type": "uint16"
+					}
+				],
+				"name": "bid",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"name": "bids",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "bidTime",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "bidAmount",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "user",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "apr",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint16",
+						"name": "ltv",
+						"type": "uint16"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "_poolId",
+						"type": "uint256"
+					}
+				],
+				"name": "cancel",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "_poolId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "_newAddress",
+						"type": "address"
+					},
+					{
+						"internalType": "bool",
+						"name": "_status",
+						"type": "bool"
+					}
+				],
+				"name": "changeWhitelist",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "count",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "_operator",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "_token",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "_oracleAddress",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "_collectionAddress",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "_nftId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "_startTime",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "_endTime",
+						"type": "uint256"
+					},
+					{
+						"internalType": "bool",
+						"name": "_liquidatable",
+						"type": "bool"
+					},
+					{
+						"internalType": "bool",
+						"name": "_whitelisted",
+						"type": "bool"
+					}
+				],
+				"name": "launch",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "_poolId",
+						"type": "uint256"
+					}
+				],
+				"name": "liquidate",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "_poolId",
+						"type": "uint256"
+					}
+				],
+				"name": "liquidateEarly",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"name": "loans",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "owner",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "token",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "operator",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "oracleAddress",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "collectionAddress",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "apr",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "nftId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "startTime",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "endTime",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "numBids",
+						"type": "uint256"
+					},
+					{
+						"internalType": "bool",
+						"name": "liquidatable",
+						"type": "bool"
+					},
+					{
+						"internalType": "bool",
+						"name": "whitelisted",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "_poolId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "_amount",
+						"type": "uint256"
+					}
+				],
+				"name": "repay",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "_poolId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "_newAddress",
+						"type": "address"
+					}
+				],
+				"name": "setNewBidOwner",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"name": "userPoolReserve",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "_poolId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "bool",
+						"name": "_whitelist",
+						"type": "bool"
+					}
+				],
+				"name": "whitelistStatusUpdate",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"name": "whitelistedAddresses",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"author": "William, Junion, Austin",
+			"kind": "dev",
+			"methods": {
+				"bid(uint256,uint256,uint256,uint16)": {
+					"params": {
+						"_amount": "Present Value of the bid amount",
+						"_apr": "APR of the bid",
+						"_ltv": "LTV of the loan. Default is 0 if liquidatable isn't turned on.",
+						"_poolId": "Pool ID"
+					}
+				},
+				"cancel(uint256)": {
+					"params": {
+						"_poolId": "pool ID"
+					}
+				},
+				"changeWhitelist(uint256,address,bool)": {
+					"params": {
+						"_newAddress": "Address",
+						"_poolId": "pool ID",
+						"_status": "status. True = WL'd, False = Not WL'd"
+					}
+				},
+				"launch(address,address,address,address,uint256,uint256,uint256,bool,bool)": {
+					"params": {
+						"_collectionAddress": ", address for the Wrapper NFT, although this could be literally any NFT",
+						"_endTime": ", the endTime of the loan in blocks",
+						"_liquidatable": ", if the loan can be liquidatable",
+						"_nftId": ", nftId",
+						"_operator": ", EOA or normal Contract. Can act on behalf of owner to rollover a loan. Set address(0) if not used",
+						"_oracleAddress": ", address for the collection address asset. Default is ChainlinkOracle.sol Requires liquidatable = true",
+						"_startTime": ", the startTime of the loan in blocks",
+						"_token": ", base borrowable asset, only one per loan.",
+						"_whitelisted": ", if the loan is whitelisted to only approved bidders"
+					}
+				},
+				"liquidate(uint256)": {
+					"params": {
+						"_poolId": "pool ID"
+					}
+				},
+				"liquidateEarly(uint256)": {
+					"params": {
+						"_poolId": "pool Id"
+					}
+				},
+				"repay(uint256,uint256)": {
+					"params": {
+						"_amount": "amount to pay back",
+						"_poolId": "pool ID"
+					}
+				},
+				"setNewBidOwner(uint256,address)": {
+					"params": {
+						"_newAddress": "New owner of debt position",
+						"_poolId": "Pool ID"
+					}
+				},
+				"whitelistStatusUpdate(uint256,bool)": {
+					"params": {
+						"_poolId": "pool ID",
+						"_whitelist": "status. True = Whitelist, False = no Whitelist"
+					}
+				}
+			},
+			"title": "LAN: unopinianated lending infrastructure for literally any nft",
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {
+				"bid(uint256,uint256,uint256,uint16)": {
+					"notice": "Setting and accepting bids for the asset"
+				},
+				"bids(uint256,uint256)": {
+					"notice": "Mapping from PoolID => Bid Number => Bid. Keep track of bids"
+				},
+				"cancel(uint256)": {
+					"notice": "Cancel Auction if it hasn't started"
+				},
+				"changeWhitelist(uint256,address,bool)": {
+					"notice": "Update Whitelist members. Change Whitelist members. Requires Whitelist = True to take action."
+				},
+				"count()": {
+					"notice": "Count number of loans, both expired and active"
+				},
+				"launch(address,address,address,address,uint256,uint256,uint256,bool,bool)": {
+					"notice": "Launching the auction"
+				},
+				"liquidate(uint256)": {
+					"notice": "Liquidate the NFT if the loan is over without a repayment, or if Liquidatable=True, and the loan is liquidated."
+				},
+				"liquidateEarly(uint256)": {
+					"notice": "Liquidate early if the borrower so chooses."
+				},
+				"loans(uint256)": {
+					"notice": "Keeping track of loans. PoolId => loans"
+				},
+				"repay(uint256,uint256)": {
+					"notice": "Pay down the loan to restore the Health Factor, or end the loan prematurely"
+				},
+				"setNewBidOwner(uint256,address)": {
+					"notice": "Transferring a bid to another address. Ignores whitelist if there is one. Similar to the NFTfi Promissory Note"
+				},
+				"userPoolReserve(uint256)": {
+					"notice": "Mapping from PoolID => User Funds. Tracks repayments from users. Funds aren't transferred to the borrower, but are kept."
+				},
+				"whitelistStatusUpdate(uint256,bool)": {
+					"notice": "Update Whitelist status."
+				},
+				"whitelistedAddresses(uint256,address)": {
+					"notice": "Mapping from PoolID => Bidder Address => bool. True = Whitelisted, False = not. Wh"
+				}
+			},
+			"notice": "Code is really rough and likely contains bugs :)",
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"contracts/mainliquidations.sol": "LAN"
+		},
+		"evmVersion": "london",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"/contracts/IPriceOracle.sol": {
+			"keccak256": "0xdabed1b1214f7f821fb9833d6d5eb4b92ac18eacb5db83222235eaf9fb17e24d",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://63fb1f83980a5e691e8066322a18202d004191c536af9360d8d612a8915a1f45",
+				"dweb:/ipfs/QmSZ6bwaEjRsCeYnmbkYgY6ZSW3pqmXYPE7jLv2WBqCo5W"
+			]
+		},
+		"@openzeppelin/contracts/token/ERC20/IERC20.sol": {
+			"keccak256": "0x9750c6b834f7b43000631af5cc30001c5f547b3ceb3635488f140f60e897ea6b",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://5a7d5b1ef5d8d5889ad2ed89d8619c09383b80b72ab226e0fe7bde1636481e34",
+				"dweb:/ipfs/QmebXWgtEfumQGBdVeM6c71McLixYXQP5Bk6kKXuoY4Bmr"
+			]
+		},
+		"@openzeppelin/contracts/token/ERC721/IERC721.sol": {
+			"keccak256": "0xed6a749c5373af398105ce6ee3ac4763aa450ea7285d268c85d9eeca809cdb1f",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://20a97f891d06f0fe91560ea1a142aaa26fdd22bed1b51606b7d48f670deeb50f",
+				"dweb:/ipfs/QmTbCtZKChpaX5H2iRiTDMcSz29GSLCpTCDgJpcMR4wg8x"
+			]
+		},
+		"@openzeppelin/contracts/utils/introspection/IERC165.sol": {
+			"keccak256": "0x447a5f3ddc18419d41ff92b3773fb86471b1db25773e07f877f548918a185bf1",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://be161e54f24e5c6fae81a12db1a8ae87bc5ae1b0ddc805d82a1440a68455088f",
+				"dweb:/ipfs/QmP7C3CHdY9urF4dEMb9wmsp1wMxHF6nhA2yQE5SKiPAdy"
+			]
+		},
+		"contracts/mainliquidations.sol": {
+			"keccak256": "0xbdb24287b36b7cbbc07966d0498cf2cf1c0481070b39fe2360bb733eef3b36f2",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://6cd83432ef7ca47dc8ab2df2ca6d10681f3bbb026f1dade69cf8c63b65844db4",
+				"dweb:/ipfs/Qmc7KvTrgWTqhVkL56A7dAb9CGYVBPcr8hz4EAg9CMcnv9"
+			]
+		}
+	},
+	"version": 1
+}
