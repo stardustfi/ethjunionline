@@ -322,15 +322,12 @@ contract LAN {
         Bid memory latestBid = bids[_poolId][loan.numBids];
         uint256 timeElapsed;
 
-        //maybe with pen and paper have to see what evaluates to what? idk
 
-//    return
-//             latestBid.bidAmount +
-//             (((latestBid.bidAmount * loan.apr) / 10**18) * timeElapsed) /
-//             SECONDS_IN_ONE_YEAR;
+   return
+            latestBid.bidAmount +
+            (((latestBid.bidAmount * loan.apr) / 10**18) * timeElapsed) /
+            SECONDS_IN_ONE_YEAR;
     
-    //if first bid 0? but then maybe still prob will exist..
-            return 0;
            
     }
        
