@@ -2,9 +2,9 @@
 pragma solidity ^0.8.16;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "BaseBidding.sol";
-
-// import "/contracts/BaseBidding .sol"; <- HH doesn't like absolute paths, but remix does
+import "@openzeppelin/contracts/access/ownable.sol";
+import "./contracts/DutchAuction.sol";
+import "./contracts/ERC4626.sol";
 
 /// @notice Base implementation of BaseBid, similar to Compound V3
 /// @title BaseBid1
@@ -40,7 +40,7 @@ interface IWrapper {
     function getTokens(uint256 _nftId) public view returns (address[] memory) {}
 }
 
-contract BaseBid1 is BaseBidding, ERC4626 {
+contract BaseBid1 is BaseBidding, ERC4626, DutchAuction {
     event newLoan(
         address collectionAddress,
         uint16 apr,
@@ -101,6 +101,7 @@ contract BaseBid1 is BaseBidding, ERC4626 {
             string.concat(_baseAsset._symbol, "PT")
         )
         ERC4626(_baseAsset)
+        DutchAuction(_baseAsset)
     {
         admin = _admin;
         baseAsset = _baseAsset;
@@ -121,7 +122,12 @@ contract BaseBid1 is BaseBidding, ERC4626 {
         uint256 LTV;
         address oracle;
     }
+
+    // Mapping Token Address => Terms
     mapping(address => Term) public whitelists;
+
+    // Mapping PoolId => amountPaid
+    mapping(uint256 => uint256) public pricePaid;
 
     /// @notice Add whitelist asset to vault
     /// @param _token is token address
@@ -151,7 +157,7 @@ contract BaseBid1 is BaseBidding, ERC4626 {
     /// @notice Liquidate Auction if the auction can be liquidated. Asset is kept in contract but approved to the owner
     /// Owner can withdraw at any time, but if admin is changed, the approval isn't updated.
     /// @param _poolId The pool ID
-    function liquidateAuction(uint256 _poolId) public virtual onlyOwner {
+    function liquidateAuction(uint256 _poolId) public virtual {
         try LAN.liquidate(_poolId) {
             (
                 ,
@@ -166,10 +172,10 @@ contract BaseBid1 is BaseBidding, ERC4626 {
                 ,
 
             ) = readLoan(_poolId);
-            liquidation
         } catch (string memory reason) {
             emit log(reason);
         }
+        beginAuction(amountPaid[_poolId], 10, collectionAddress, nftId);
     }
 
     /// @notice Call the LAN contract and make a bid with specific parameters. LTV is determined inclusive of accrued interest.
@@ -208,6 +214,7 @@ contract BaseBid1 is BaseBidding, ERC4626 {
         try LAN.bid(_poolId, _borrowAmount, apr) {
             emit newLoan(collectionAddress, apr, poolId, bidAmount);
             _utilization();
+            amountPaid[_poolId] = _borrowAmount;
         } catch (string memory reason) {
             emit log(reason);
         }
