@@ -171,11 +171,6 @@ contract LAN {
         uint256 numBids = loan.numBids + 1;
         loan.numBids = numBids;
 
-        //dont understand whats going on here...
-            //and if irs first bidder?
-            //maybe walk thru with paper
-
-            //if numbirds!=1
         IERC20(loan.token).transferFrom(
             msg.sender,
             bids[_poolId][numBids].user,
