@@ -52,4 +52,15 @@ contract Wrapper is ERC721{
         }
 
     }
+    /**
+     * @notice
+     * Just returns same wrapper NFT for every image
+     */
+    function tokenURI(uint256 tokenId) public view override returns (string memory) {
+        _requireMinted(tokenId);
+
+        string memory baseURI = "ipfs://bafkreid3tc5dq5tneapvfehsbo5oa4akw5gjwg363fboamfkhepgpfpzia"
+        return bytes(baseURI).length > 0 ? string(abi.encodePacked(baseURI)) : "";
+    }
+
 }

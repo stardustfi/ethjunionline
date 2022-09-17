@@ -6,10 +6,10 @@ import "BaseBidding.sol";
 
 // import "/contracts/BaseBidding .sol"; <- HH doesn't like absolute paths, but remix does
 
-/// @notice Base implementation of BaseBid, similar to Compound V3
+/// @notice Base implementation of BaseBid
 /// @title BaseBid1
 /// @author William, Junion
-/// @notice BadeBid2, but with vault token support to allow vault logic
+/// Single bidding contract, no external depositing
 interface IPriceOracle {
     // Standardize oracle output
     // Return price of asset in WETH terms, (1e18)
@@ -40,7 +40,7 @@ interface IWrapper {
     function getTokens(uint256 _nftId) public view returns (address[] memory) {}
 }
 
-contract BaseBid1 is BaseBidding, ERC4626 {
+contract BaseBid2 is BaseBidding {
     event newLoan(
         address collectionAddress,
         uint16 apr,
@@ -96,11 +96,6 @@ contract BaseBid1 is BaseBidding, ERC4626 {
             _longestTerm,
             _adminFee
         )
-        ERC20(
-            string.concat(_baseAsset._name, "LAN Pool Token"),
-            string.concat(_baseAsset._symbol, "PT")
-        )
-        ERC4626(_baseAsset)
     {
         admin = _admin;
         baseAsset = _baseAsset;
@@ -141,7 +136,19 @@ contract BaseBid1 is BaseBidding, ERC4626 {
         delete whitelists[_token];
     }
 
-    /// @notice Deposit/withdraw is on ERC4626
+    /// @notice Deposit
+    /// @param _tokenAmount is amount deposited
+    function deposit(uint256 _tokenAmount) public virtual shutdown {
+        IERC20(baseAsset).transferFrom(msg.sender, address(this), _tokenAmount);
+        cash += _tokenAmount;
+    }
+
+    /// @notice Withdraw
+    /// @param _tokenAmount is amount withdrawn
+    function withdraw(uint256 _tokenAmount) public virtual onlyOwner {
+        IERC20(baseAsset).transferFrom(msg.sender, address(this), _tokenAmount);
+        cash -= _tokenAmount;
+    }
 
     /// @notice Pause, no new loans get issued.
     function pause() external onlyOwner {
@@ -166,7 +173,7 @@ contract BaseBid1 is BaseBidding, ERC4626 {
                 ,
 
             ) = readLoan(_poolId);
-            liquidation
+            IERC721(collectionAddress).approve(admin, nftId);
         } catch (string memory reason) {
             emit log(reason);
         }
@@ -263,11 +270,11 @@ contract BaseBid1 is BaseBidding, ERC4626 {
     }
 
     /// @notice Change the minAPR based on the # of assets deposited (cash), and # of assets currently inside (reserves)
-    function _utilization() internal view {
+    function _utilization() internal {
         // compound Jump rate Model kinda
+
         uint256 reserves = IERC20(baseAsset).balanceOf(address(this));
-        // totalsupply() is total supply of the shares
-        uint16 util = reserves / totalSupply();
+        uint16 util = reserves / cash;
         if (util <= kink) {
             // Increase minAPR with utilization linearly
             minAPR += util * 10**19;

@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.16;
 
-import "/contracts/IPriceOracle.sol";
+import "IPriceOracle.sol";
+
+//import "/contracts/IPriceOracle. sol";
 
 interface AggregatorV3Interface {
     function decimals() external view returns (uint8);
@@ -33,7 +35,11 @@ contract ChainlinkOracle is IPriceOracle {
     IWrapper private constant Wrapper = IWrapper();
     event Log(string message);
 
-    function getBundlePrice(address wrapper, uint256 nftId) external view returns(uint256) {
+    function getBundlePrice(address wrapper, uint256 nftId)
+        external
+        view
+        returns (uint256)
+    {
         address[] memory tokens = Wrapper.getTokens(nftId);
         uint256[] memory amounts = Wrapper.getAmounts(nftId);
         // loop through all assets and calculate borrowable USD
@@ -41,9 +47,7 @@ contract ChainlinkOracle is IPriceOracle {
         uint256 length = tokens.length;
         for (uint256 i = 0; i < length; ) {
             // getUnderlyingPrice returns price in 18 decimals and USD
-            try _getUnderlyingPrice(address) returns (
-                uint256 underlyingPrice
-            ) {
+            try _getUnderlyingPrice(address) returns (uint256 underlyingPrice) {
                 totalPriceUSD += underlyingPrice;
             } catch {
                 emit Log("Chainlink call failed for this asset");
@@ -53,8 +57,8 @@ contract ChainlinkOracle is IPriceOracle {
             }
         }
         return totalPriceUSD;
-        }
-    
+    }
+
     // todo implement interface with Wrapper @junion
     // rejigger CL stuff, the link to the imports above is https://raw.githubusercontent.com/Rari-Capital/fuse-contracts/master/contracts/external/chainlink/AggregatorInterface.sol
 
@@ -83,12 +87,6 @@ contract ChainlinkOracle is IPriceOracle {
             underlying,
             decimals
         );
-        return
-            uint256(underlyingPrice).mul(1e26).div(
-                10 **
-                    uint256(
-                        decimals
-                    )
-            );
+        return uint256(underlyingPrice).mul(1e26).div(10**uint256(decimals));
     }
 }

@@ -2,12 +2,13 @@
 pragma solidity ^0.8.16;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "/contracts/IPriceOracle.sol";
+import "IPriceOracle.sol";
+
+// import "/contracts/IPriceOracle. sol";
 
 /// @title LAN: unopinianated lending infrastructure for literally any nft
 /// @author William, Junion, Austin
 /// @notice Code is really rough and likely contains bugs :)
-
 
 contract LAN {
     event newPool(
@@ -270,11 +271,10 @@ contract LAN {
         Bid memory latestBid,
         uint256 _poolId
     ) internal view returns (bool) {
-        uint256 currentPrice = IPriceOracle(loan.oracleAddress)
-            .getBundlePrice(loan.collectionAddress, loan.nftId) /
-            IPriceOracle(loan.oracleAddress).getUnderlyingPrice(
-                loan.token
-            );
+        uint256 currentPrice = IPriceOracle(loan.oracleAddress).getBundlePrice(
+            loan.collectionAddress,
+            loan.nftId
+        ) / IPriceOracle(loan.oracleAddress).getUnderlyingPrice(loan.token);
         if (
             (latestBid.bidAmount - userPoolReserve[_poolId]) /
                 (latestBid.ltv * currentPrice) >=
