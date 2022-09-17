@@ -2,13 +2,12 @@
 pragma solidity ^0.8.16;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "IPriceOracle.sol";
-
-// import "/contracts/IPriceOracle. sol";
+import "./IPriceOracle.sol";
 
 /// @title LAN: unopinianated lending infrastructure for literally any nft
 /// @author William, Junion, Austin
 /// @notice Code is really rough and likely contains bugs :)
+
 
 contract LAN {
     event newPool(
@@ -32,13 +31,11 @@ contract LAN {
     /// @param _collectionAddress, address for the Wrapper NFT, although this could be literally any NFT
     /// @param _apr, APR for the loan
     /// @param _nftId, nftId
-    /// @param time, struft for startTime and endTime.
-    /// @param _startTime, the startTime of the loan in blocks
-    /// @param _endTime, the endTime of the loan in blocks
+    /// @param time Time struct contains start time and end time
     /// @param _numBid, the number of bids, keep track of the latest bid
     /// @param _liquidatable, if the loan can be liquidatable
     /// @param _whitelisted, if the loan is whitelisted to only approved bidders
-   struct Loan {
+    struct Loan {
         address owner;
         address token;
         address operator;
@@ -54,7 +51,6 @@ contract LAN {
         bool whitelisted;
         uint256 poolId;
     }
-    /// @notice 
     /// @notice Keeping track of loans. PoolId => loans
     mapping(uint256 => Loan) public loans;
 
@@ -66,7 +62,7 @@ contract LAN {
         uint16 ltv;
     }
 
-     struct Time {
+    struct Time {
         uint256 startTime;
         uint256 endTime;
     }
@@ -134,8 +130,7 @@ contract LAN {
         
         bids[count][0].bidTime = block.timestamp;
         count++;
-        //emit newPool(count, _collectionAddress, _nftId);
-        
+        emit newPool(count, _collectionAddress, _nftId);
     }
 
     /// @notice Setting and accepting bids for the asset
@@ -149,7 +144,7 @@ contract LAN {
         uint256 _apr,
         uint16 _ltv
     ) external {
-        require(_started(_poolId), "LAN: not started");
+        //require(_started(_poolId), "LAN: not started");
         require(!_ended(_poolId), "LAN: already ended");
         Loan storage loan = loans[_poolId];
         // Check if it's whitelisted and if so, the address is whitelisted
@@ -175,11 +170,18 @@ contract LAN {
         loan.apr = _apr;
         uint256 numBids = loan.numBids + 1;
         loan.numBids = numBids;
+
+        //dont understand whats going on here...
+            //and if irs first bidder?
+            //maybe walk thru with paper
+
+            //if numbirds!=1
         IERC20(loan.token).transferFrom(
             msg.sender,
             bids[_poolId][numBids].user,
             loanValue
         );
+
         IERC20(loan.token).transferFrom(
             msg.sender,
             loan.owner,
@@ -279,12 +281,13 @@ contract LAN {
     function _liquidate(
         Loan memory loan,
         Bid memory latestBid,
-        uint256 _poolId
-    ) internal view returns (bool) {
-        uint256 currentPrice = IPriceOracle(loan.oracleAddress).getBundlePrice(
-            loan.collectionAddress,
-            loan.nftId
-        ) / IPriceOracle(loan.oracleAddress).getUnderlyingPrice(loan.token);
+        uint256 _poolId      
+    ) internal returns (bool) {
+        uint256 currentPrice = IPriceOracle(loan.oracleAddress)
+            .getBundlePrice(loan.collectionAddress, loan.nftId) /
+            IPriceOracle(loan.oracleAddress).getUnderlyingPrice(
+                loan.token                
+            );
         if (
             (latestBid.bidAmount - userPoolReserve[_poolId]) /
                 (latestBid.ltv * currentPrice) >=
@@ -313,20 +316,24 @@ contract LAN {
         internal
         view
         returns (uint256)
+        
     {
         Loan memory loan = loans[_poolId];
         Bid memory latestBid = bids[_poolId][loan.numBids];
         uint256 timeElapsed;
-        if (_ended(_poolId)) {
-            timeElapsed = latestBid.bidTime - loan.time.endTime;
-        } else {
-            timeElapsed = latestBid.bidTime - block.timestamp;
-        }
-        return
-            latestBid.bidAmount +
-            (((latestBid.bidAmount * loan.apr) / 10**18) * timeElapsed) /
-            SECONDS_IN_ONE_YEAR;
+
+        //maybe with pen and paper have to see what evaluates to what? idk
+
+//    return
+//             latestBid.bidAmount +
+//             (((latestBid.bidAmount * loan.apr) / 10**18) * timeElapsed) /
+//             SECONDS_IN_ONE_YEAR;
+    
+    //if first bid 0? but then maybe still prob will exist..
+            return 0;
+           
     }
+       
 
     function _ended(uint256 _poolId) internal view returns (bool) {
         return loans[_poolId].time.endTime <= block.timestamp;
