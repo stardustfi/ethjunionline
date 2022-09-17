@@ -1,14 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.16;
 
-import "IPriceOracle.sol";
+import "./IPriceOracle.sol";
+import "./Denominations.sol";
 
-//import "/contracts/IPriceOracle. sol";
+// function getUnderlyingPrice(address underlying,address quote) external view returns (uint256);
+// function getBundlePrice(address wrapper, uint256 nftId) external view returns(uint256);
 
 interface AggregatorV3Interface {
     function decimals() external view returns (uint8);
 
-    function latestRoundData()
+    function latestRoundData(address base, address quote)
         external
         view
         returns (
@@ -30,37 +32,48 @@ interface IWrapper {
 }
 
 contract ChainlinkOracle is IPriceOracle {
+    //Chainlink Feed Registry are currently available on eth mainnet
     AggregatorV3Interface private constant feedRegistry =
-        AggregatorV3Interface();
-    IWrapper private constant Wrapper = IWrapper();
+        AggregatorV3Interface(0x47Fb2585D2C56Fe188D0E6ec628a38b74fCeeeDf);
     event Log(string message);
+
+    address public immutable Wrapper;
+
+    constructor(address _wrapper) {
+        Wrapper = _wrapper;
+    }
 
     function getBundlePrice(address wrapper, uint256 nftId)
         external
-        view
         returns (uint256)
     {
-        address[] memory tokens = Wrapper.getTokens(nftId);
-        uint256[] memory amounts = Wrapper.getAmounts(nftId);
+        /// @notice If it's say a BAYC and not a wrapper, getUnderlyingPrice
+        if (wrapper != Wrapper) return _getUnderlyingPrice(wrapper);
+
+        address[] memory tokens = IWrapper(wrapper).getTokens(nftId);
+        uint256[] memory amounts = IWrapper(wrapper).getAmounts(nftId);
         // loop through all assets and calculate borrowable USD
         uint256 totalPriceUSD; // 18 decimal places
         uint256 length = tokens.length;
+
         for (uint256 i = 0; i < length; ) {
             // getUnderlyingPrice returns price in 18 decimals and USD
-            try _getUnderlyingPrice(address) returns (uint256 underlyingPrice) {
+
+            //the interface states that it should return zero when the price is unavailable.
+            // function getUnderlyingPrice(address underlying,address quote) external view returns (uint256);
+
+            uint256 underlyingPrice = _getUnderlyingPrice(wrapper);
+
+            if (underlyingPrice == 0) {
                 totalPriceUSD += underlyingPrice;
-            } catch {
-                emit Log("Chainlink call failed for this asset");
-            }
-            unchecked {
                 ++i;
+            } else {
+                emit Log("Chainlink call failed for this asset");
+                //No revert if CL call fails since there is no
             }
         }
         return totalPriceUSD;
     }
-
-    // todo implement interface with Wrapper @junion
-    // rejigger CL stuff, the link to the imports above is https://raw.githubusercontent.com/Rari-Capital/fuse-contracts/master/contracts/external/chainlink/AggregatorInterface.sol
 
     function getUnderlyingPrice(address _underlying)
         external
@@ -77,16 +90,21 @@ contract ChainlinkOracle is IPriceOracle {
         view
         returns (uint256)
     {
+        //there is this concept address quote  ISO 4217 standard as per https://docs.chain.link/docs/feed-registry/#base-and-quote
+
+        address quote = Denominations.USD;
         /*
         try feedRegistry.latestRoundData(underlying, Denominations.USD) returns (,int256 tokenUsdPrice,,,) {
-
         (underlyingPrice 10 ** uint256(feedRegistry.decimals(underlying, Denominations.USD))
         */
         uint8 decimals = feedRegistry.decimals();
-        (, int128 underlyingPrice, , , ) = feedRegistry.latestRoundData(
+        (, int256 underlyingPrice, , , ) = feedRegistry.latestRoundData(
             underlying,
-            decimals
+            quote
         );
-        return uint256(underlyingPrice).mul(1e26).div(10**uint256(decimals));
+
+        return
+            //overflow/underflow checks default in compiler in 0.8
+            uint256((underlyingPrice) * (1e26)) / (10**uint256(decimals));
     }
 }
