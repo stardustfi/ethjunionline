@@ -3,6 +3,7 @@ pragma solidity ^0.8.16;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "./IPriceOracle.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 /// @title LAN: unopinianated lending infrastructure for literally any nft
 /// @author William, Junion, Austin
@@ -10,6 +11,7 @@ import "./IPriceOracle.sol";
 
 
 contract LAN {
+    using SafeMath for uint; 
     event newPool(
         uint256 indexed poolId,
         address collectionAddress,
@@ -168,21 +170,27 @@ contract LAN {
         // Update and transfer tokens to right people.
         bids[_poolId][loan.numBids] = newBid;
         loan.apr = _apr;
-        uint256 numBids = loan.numBids + 1;
-        loan.numBids = numBids;
 
+   uint256 numBids = loan.numBids;
+   if (numBids!=0){
+ 
         IERC20(loan.token).transferFrom(
             msg.sender,
             bids[_poolId][numBids].user,
             loanValue
         );
-
+   }
+ 
+        loan.numBids = numBids+1;
+   
         IERC20(loan.token).transferFrom(
             msg.sender,
             loan.owner,
             _amount - loanValue
         );
     }
+
+
 
     /// @notice Transferring a bid to another address. Ignores whitelist if there is one. Similar to the NFTfi Promissory Note
     /// @param _poolId Pool ID
@@ -318,10 +326,10 @@ contract LAN {
         uint256 timeElapsed;
 
 
-   return
+return
             latestBid.bidAmount +
-            (((latestBid.bidAmount * loan.apr) / 10**18) * timeElapsed) /
-            SECONDS_IN_ONE_YEAR;
+            (((latestBid.bidAmount.mul(loan.apr)).div( 10**18)).mul(timeElapsed)).div(
+            SECONDS_IN_ONE_YEAR);
     
            
     }
