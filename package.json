@@ -10,6 +10,7 @@
     "@openzeppelin/contracts": "^4.7.3",
     "dotenv": "^16.0.2",
     "solmate": "^6.6.1",
+    "uniswap": "^0.0.1",
     "usingtellor": "^4.0.7",
     "vrgdas": "github:transmissions11/VRGDAs"
   },

@@ -18,7 +18,6 @@ interface IPriceOracle {
         returns (uint256);
 }
 
-
 interface IWrapper {
     function getAmounts(uint256 _nftId)
         public
@@ -122,14 +121,14 @@ contract BaseBid2 is BaseBidding {
 
     /// @notice Deposit
     /// @param _tokenAmount is amount deposited
-    function deposit(uint256 _tokenAmount) public virtual shutdown {
+    function deposit(uint256 _tokenAmount) public override shutdown {
         IERC20(baseAsset).transferFrom(msg.sender, address(this), _tokenAmount);
         cash += _tokenAmount;
     }
 
     /// @notice Withdraw
     /// @param _tokenAmount is amount withdrawn
-    function withdraw(uint256 _tokenAmount) public virtual onlyOwner {
+    function withdraw(uint256 _tokenAmount) public override onlyOwner {
         IERC20(baseAsset).transferFrom(msg.sender, address(this), _tokenAmount);
         cash -= _tokenAmount;
     }
@@ -209,7 +208,7 @@ contract BaseBid2 is BaseBidding {
     /// @param nftId The ID of the NFT for the wrapper contract
     /// @param endTime The amount requested to borrow
     /// @param apr The apr for the borrow
-function _calculateLTV(
+    function _calculateLTV(
         uint256 nftId,
         uint256 endTime,
         uint256 apr
@@ -227,7 +226,10 @@ function _calculateLTV(
                 // getUnderlyingPrice returns price in 18 decimals and USD
                 uint256 collateralPrice = IPriceOracle(whitelist.oracle)
                     .getUnderlyingPrice(tokens[i]);
-                uint256 ltvAmt = amounts[i].mulDiv(whitelist[tokens[i]].LTV, 1e18);
+                uint256 ltvAmt = amounts[i].mulDiv(
+                    whitelist[tokens[i]].LTV,
+                    1e18
+                );
                 borrowableUSD += ltvAmt.mulDiv(collateralPrice, 1e18);
             }
             unchecked {

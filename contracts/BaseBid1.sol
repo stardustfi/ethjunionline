@@ -4,6 +4,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/access/ownable.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
+import '@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol';
 import "./DutchAuction.sol";
 import "./ERC4626.sol";
 
@@ -282,5 +283,24 @@ contract BaseBid1 is BaseBidding, ERC4626, DutchAuction, ownable {
             // Change linear slope by 10x
             minAPR += util * 10**20;
         }
+    }
+    // swap reserves for aTokens
+    function _swapforAtoken(bool direction) internal {
+        address aDAI = 0x028171bCA77440897B824Ca71D1c56caC55b68A3'
+        address[] path;
+        if(bool){
+            path.push(aDAI)
+            path.push(baseAsset)
+        } else {
+            path.push(baseAsset)
+            path.push(aDAI)
+        }
+        
+        swapExactTokensForTokens(
+            reserves,
+            reserves,
+            path,
+            address(this),
+            block.timestamp);
     }
 }
