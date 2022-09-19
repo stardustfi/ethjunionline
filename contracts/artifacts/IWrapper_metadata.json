@@ -1,0 +1,108 @@
+{
+	"compiler": {
+		"version": "0.8.17+commit.8df45f5f"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "_nftId",
+						"type": "uint256"
+					}
+				],
+				"name": "getAmounts",
+				"outputs": [
+					{
+						"internalType": "uint256[]",
+						"name": "",
+						"type": "uint256[]"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "_nftId",
+						"type": "uint256"
+					}
+				],
+				"name": "getTokens",
+				"outputs": [
+					{
+						"internalType": "address[]",
+						"name": "",
+						"type": "address[]"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"contracts/ChainlinkOracle.sol": "IWrapper"
+		},
+		"evmVersion": "london",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"@openzeppelin/contracts/utils/math/Math.sol": {
+			"keccak256": "0xd15c3e400531f00203839159b2b8e7209c5158b35618f570c695b7e47f12e9f0",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://b600b852e0597aa69989cc263111f02097e2827edc1bdc70306303e3af5e9929",
+				"dweb:/ipfs/QmU4WfM28A1nDqghuuGeFmN3CnVrk6opWtiF65K4vhFPeC"
+			]
+		},
+		"contracts/ChainlinkOracle.sol": {
+			"keccak256": "0x8ce5b65ee7edb00ba82bca8c373476dcbcae7a226d764020661567d632aaa668",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://ec3a34d0c054f07bab73eb77f8f7f6db6c2f51a227e62b9cad45262cce18107d",
+				"dweb:/ipfs/QmT6rD9swZBJRLJ2UpiUsYuGb7PxKKAXJTPPdt2jj9pw7B"
+			]
+		},
+		"contracts/Denominations.sol": {
+			"keccak256": "0xb5ec27aedcbf4b32a9e514cd7f5d3b95093e3d04a4eb42f482377f45dc030d2d",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://afd7b7f2a5563993cdd6d7e5c6e58748d3b661a588fd3abf5e53e7f1625a7b88",
+				"dweb:/ipfs/QmccN3SPi23dvChdZfMgC6Hj16uK3FxDgpffvGSKR6aWJL"
+			]
+		},
+		"contracts/IPriceOracle.sol": {
+			"keccak256": "0xdabed1b1214f7f821fb9833d6d5eb4b92ac18eacb5db83222235eaf9fb17e24d",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://63fb1f83980a5e691e8066322a18202d004191c536af9360d8d612a8915a1f45",
+				"dweb:/ipfs/QmSZ6bwaEjRsCeYnmbkYgY6ZSW3pqmXYPE7jLv2WBqCo5W"
+			]
+		}
+	},
+	"version": 1
+}

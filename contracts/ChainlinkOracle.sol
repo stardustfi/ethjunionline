@@ -3,6 +3,7 @@ pragma solidity ^0.8.16;
 
 import "./IPriceOracle.sol";
 import "./Denominations.sol";
+import "@openzeppelin/contracts/utils/math/Math.sol";
 
 // function getUnderlyingPrice(address underlying,address quote) external view returns (uint256);
 // function getBundlePrice(address wrapper, uint256 nftId) external view returns(uint256);
@@ -32,6 +33,7 @@ interface IWrapper {
 }
 
 contract ChainlinkOracle is IPriceOracle {
+    using Math for uint256;
     //Chainlink Feed Registry are currently available on eth mainnet
     AggregatorV3Interface private constant feedRegistry =
         AggregatorV3Interface(0x47Fb2585D2C56Fe188D0E6ec628a38b74fCeeeDf);
@@ -44,7 +46,7 @@ contract ChainlinkOracle is IPriceOracle {
     }
 
     function getBundlePrice(address wrapper, uint256 nftId)
-        external
+        external view
         returns (uint256)
     {
         /// @notice If it's say a BAYC and not a wrapper, getUnderlyingPrice
@@ -56,20 +58,13 @@ contract ChainlinkOracle is IPriceOracle {
         uint256 totalPriceUSD; // 18 decimal places
         uint256 length = tokens.length;
 
-        for (uint256 i = 0; i < length; ) {
+        for (uint256 i = 0; i < length; i++) {
             // getUnderlyingPrice returns price in 18 decimals and USD
-
-            //the interface states that it should return zero when the price is unavailable.
+            // the interface states that it should return zero when the price is unavailable.
             // function getUnderlyingPrice(address underlying,address quote) external view returns (uint256);
-
-            uint256 underlyingPrice = _getUnderlyingPrice(wrapper);
-
-            if (underlyingPrice == 0) {
-                totalPriceUSD += underlyingPrice;
-                ++i;
-            } else {
-                emit Log("Chainlink call failed for this asset");
-                //No revert if CL call fails since there is no
+            uint256 underlyingPrice = _getUnderlyingPrice(tokens[i]);
+            if (underlyingPrice != 0) {
+                totalPriceUSD += underlyingPrice.mulDiv(amounts[i], 1e18);
             }
         }
         return totalPriceUSD;

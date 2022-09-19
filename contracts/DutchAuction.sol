@@ -23,7 +23,7 @@ contract DutchAuction {
     uint256 private constant DURATION = 7 days;
 
     IERC20 public immutable token;
-    address payable public constant SELLER = address(this);
+    address public immutable seller;
     uint256 public auctionId;
     struct auction {
         uint256 startingPrice;
@@ -39,13 +39,14 @@ contract DutchAuction {
 
     constructor(address _token) {
         token = IERC20(_token);
+        seller = msg.sender;
     }
 
     function beginAuction(
         uint256 _startingPrice,
         uint256 _discountRate,
         address _nft,
-        uint256 _nftId,
+        uint256 _nftId
     ) public {
         require(
             _startingPrice >= _discountRate * DURATION,
@@ -57,15 +58,15 @@ contract DutchAuction {
             block.timestamp,
             block.timestamp + DURATION,
             _discountRate,
-            IERC721(_nft),
-            nftId
+            _nftId,
+            IERC721(_nft)
         );
     }
 
     function getPrice(auction memory aAuction) public view returns (uint256) {
         uint256 timeElapsed = block.timestamp - aAuction.startAt;
         uint256 discount = aAuction.discountRate * timeElapsed;
-        return startingPrice - discount;
+        return aAuction.startingPrice - discount;
     }
 
     function buy(uint256 _bidAmount, uint256 _auctionId) external payable {
@@ -77,13 +78,13 @@ contract DutchAuction {
 
         token.transferFrom(msg.sender, address(this), _bidAmount);
 
-        nft.transferFrom(SELLER, msg.sender, aAuction.nftId);
+        aAuction.nft.transferFrom(seller, msg.sender, aAuction.nftId);
 
         delete Auctions[_auctionId];
 
         uint256 refund = _bidAmount - price;
         if (refund > 0) {
-            token.transferFrom(SELLER, msg.sender, refund);
+            token.transferFrom(seller, msg.sender, refund);
         }
     }
 }
