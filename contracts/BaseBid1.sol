@@ -4,7 +4,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/access/ownable.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
-import '@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol';
+//import '@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol';
 import "./DutchAuction.sol";
 import "./ERC4626.sol";
 
@@ -33,10 +33,7 @@ interface ILan {
 }
 
 interface IWrapper {
-    function getAmounts(uint256 _nftId)
-        public
-        view
-        returns (uint256[] memory);
+    function getAmounts(uint256 _nftId) public view returns (uint256[] memory);
 
     function getTokens(uint256 _nftId) public view returns (address[] memory);
 }
@@ -244,7 +241,10 @@ contract BaseBid1 is BaseBidding, ERC4626, DutchAuction, ownable {
                 // getUnderlyingPrice returns price in 18 decimals and USD
                 uint256 collateralPrice = IPriceOracle(whitelist.oracle)
                     .getUnderlyingPrice(tokens[i]);
-                uint256 ltvAmt = amounts[i].mulDiv(whitelist[tokens[i]].LTV, 1e18);
+                uint256 ltvAmt = amounts[i].mulDiv(
+                    whitelist[tokens[i]].LTV,
+                    1e18
+                );
                 borrowableUSD += ltvAmt.mulDiv(collateralPrice, 1e18);
             }
             unchecked {
@@ -284,6 +284,7 @@ contract BaseBid1 is BaseBidding, ERC4626, DutchAuction, ownable {
             minAPR += util * 10**20;
         }
     }
+    /*
     // swap reserves for aTokens
     function _swapforAtoken(bool direction) internal {
         address aDAI = 0x028171bCA77440897B824Ca71D1c56caC55b68A3'
@@ -303,4 +304,5 @@ contract BaseBid1 is BaseBidding, ERC4626, DutchAuction, ownable {
             address(this),
             block.timestamp);
     }
+    */
 }
