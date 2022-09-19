@@ -3,7 +3,7 @@ pragma solidity ^0.8.16;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
-// import "/contracts/BaseBidding .sol"; <- HH doesn't like absolute paths, but remix does
+import "./BaseBidding.sol";
 
 /// @notice Base implementation of BaseBid
 /// @title BaseBid1
@@ -18,16 +18,6 @@ interface IPriceOracle {
         returns (uint256);
 }
 
-interface ILan {
-    function bid(
-        uint256 _poolId,
-        uint256 _amount,
-        uint256 _apr,
-        uint16 _ltv
-    ) external {}
-
-    function liquidate(uint256 _poolId) external {}
-}
 
 interface IWrapper {
     function getAmounts(uint256 _nftId)
@@ -52,11 +42,10 @@ contract BaseBid2 is BaseBidding {
     address public immutable baseAsset;
     address public immutable baseAssetOracle;
     ILan public immutable LAN;
-    uint16 public minAPY;
     bool public windDown;
     bool public liquidationOnly;
     uint16 public kink;
-    uint256 public minAPR;
+    uint256 public minapr;
     uint256 public cash;
     uint256 public longestTerm;
     uint256 public immutable adminFee;
@@ -70,7 +59,7 @@ contract BaseBid2 is BaseBidding {
     /// @param _LANContract, LAN contract
     /// @param _liquidationOnly, True if liquidations are enabled, False if not. Liquidations default oracle is Chainlink
     /// @param _kink, Integer value. A kink of 80 would correspond to a kink at 80%
-    /// @param _minAPR, the min APR for the loan before it'll get initiated
+    /// @param _minapr, the min apr for the loan before it'll get initiated
     /// @param _longestTerm, in blocks, the longest auction that the contract will participate in
     /// @param _adminFee, Admin Fee, charged on interest accrued.
 
@@ -81,7 +70,7 @@ contract BaseBid2 is BaseBidding {
         address _LANContract,
         bool _liquidationOnly,
         uint16 _kink,
-        uint256 _minAPR,
+        uint256 _minapr,
         uint256 _longestTerm,
         uint256 _adminFee
     )
@@ -91,7 +80,7 @@ contract BaseBid2 is BaseBidding {
             _baseAssetOracle,
             _LANContract,
             _liquidationOnly,
-            _minAPR,
+            _minapr,
             _longestTerm,
             _adminFee
         )
@@ -99,22 +88,18 @@ contract BaseBid2 is BaseBidding {
         admin = _admin;
         baseAsset = _baseAsset;
         baseAssetOracle = _baseAssetOracle;
-        LAN = ILan(_LANcontract);
+        LAN = ILan(_LANContract);
         kink = _kink;
-        minAPY = _minAPY;
+        minapr = _minapr;
         windDown = false;
         liquidationOnly = _liquidationOnly;
         longestTerm = _longestTerm;
         adminFee = _adminFee;
         windDown = false;
         //infinite token approval for LAN
-        IERC20(baseAsset).approve(_LANcontract, type(uint256).max);
+        IERC20(baseAsset).approve(_LANContract, type(uint256).max);
     }
 
-    struct Term {
-        uint256 LTV;
-        address oracle;
-    }
     mapping(address => Term) public whitelists;
 
     /// @notice Add whitelist asset to vault
@@ -172,6 +157,7 @@ contract BaseBid2 is BaseBidding {
                 ,
 
             ) = readLoan(_poolId);
+            // so confused, why is readLoan not working. could be because it isn't working on baseBidding. Happy debugging :)
             IERC721(collectionAddress).approve(admin, nftId);
         } catch (string memory reason) {
             emit log(reason);
@@ -182,13 +168,13 @@ contract BaseBid2 is BaseBidding {
     /// Update utilization when the loan is issued.
     /// @param _poolId The pool ID
     /// @param _borrowAmount The amount requested to borrow
-    /// @param _apr The APR for the borrow
+    /// @param _apr The apr for the borrow
     function bidWithParams(
         uint256 _poolId,
         uint256 _borrowAmount,
         uint256 _apr
     ) public shutdown onlyOwner {
-        require(_apr >= minAPY, "BaseBid: APY below minAPY");
+        require(_apr >= minapr, "BaseBid: apr below minapr");
         (
             ,
             address token,
@@ -211,8 +197,8 @@ contract BaseBid2 is BaseBidding {
             _calculateLTV(nftId, endTime, _apr) >= _borrowAmount,
             "BaseBid: Borrow Amount too high"
         );
-        try LAN.bid(_poolId, _borrowAmount, apr) {
-            emit newLoan(collectionAddress, apr, poolId, bidAmount);
+        try LAN.bid(_poolId, _borrowAmount, _apr) {
+            emit newLoan(collectionAddress, _apr, _poolId, _borrowAmount);
             _utilization();
         } catch (string memory reason) {
             emit log(reason);
@@ -222,28 +208,27 @@ contract BaseBid2 is BaseBidding {
     /// @notice Sum the value of whitelisted assets contained in the NFT wrapper. Nonwhitelisted assets are 0.
     /// @param nftId The ID of the NFT for the wrapper contract
     /// @param endTime The amount requested to borrow
-    /// @param apr The APR for the borrow
-    function _calculateLTV(
+    /// @param apr The apr for the borrow
+function _calculateLTV(
         uint256 nftId,
         uint256 endTime,
         uint256 apr
     ) internal returns (uint256) {
         address[] memory tokens = Wrapper.getTokens(nftId);
         uint256[] memory amounts = Wrapper.getAmounts(nftId);
-        whitelists[tokens[i]];
+
         // loop through all assets and calculate borrowable USD
         uint256 borrowableUSD; // 18 decimal places
         uint256 length = tokens.length;
         for (uint256 i = 0; i < length; ) {
-            Whitelist memory whitelist = whitelists[tokens[i]];
+            Term memory whitelist = whitelists[tokens[i]];
             // Check if token is on whitelist - skip if not
             if (whitelist.oracle != address(0)) {
                 // getUnderlyingPrice returns price in 18 decimals and USD
                 uint256 collateralPrice = IPriceOracle(whitelist.oracle)
                     .getUnderlyingPrice(tokens[i]);
-                borrowableUSD +=
-                    (amounts[i] * whitelist[token].LTV * collateralPrice) /
-                    10**26;
+                uint256 ltvAmt = amounts[i].mulDiv(whitelist[tokens[i]].LTV, 1e18);
+                borrowableUSD += ltvAmt.mulDiv(collateralPrice, 1e18);
             }
             unchecked {
                 ++i;
@@ -268,18 +253,18 @@ contract BaseBid2 is BaseBidding {
         bidWithParams(_poolId, _calculateLTV(nftId), apr);
     }
 
-    /// @notice Change the minAPR based on the # of assets deposited (cash), and # of assets currently inside (reserves)
+    /// @notice Change the minapr based on the # of assets deposited (cash), and # of assets currently inside (reserves)
     function _utilization() internal {
         // compound Jump rate Model kinda
 
         uint256 reserves = IERC20(baseAsset).balanceOf(address(this));
         uint16 util = reserves / cash;
         if (util <= kink) {
-            // Increase minAPR with utilization linearly
-            minAPR += util * 10**19;
+            // Increase minapr with utilization linearly
+            minapr += util * 10**19;
         } else {
             // Change linear slope by 10x
-            minAPR += util * 10**20;
+            minapr += util * 10**20;
         }
     }
 }

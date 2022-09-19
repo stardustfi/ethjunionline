@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.16;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
@@ -59,7 +60,7 @@ contract Wrapper is ERC721{
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
         _requireMinted(tokenId);
 
-        string memory baseURI = "ipfs://bafkreid3tc5dq5tneapvfehsbo5oa4akw5gjwg363fboamfkhepgpfpzia"
+        string memory baseURI = "ipfs://bafkreid3tc5dq5tneapvfehsbo5oa4akw5gjwg363fboamfkhepgpfpzia";
         return bytes(baseURI).length > 0 ? string(abi.encodePacked(baseURI)) : "";
     }
 

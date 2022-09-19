@@ -459,9 +459,6 @@
 				"symbol()": {
 					"details": "See {IERC721Metadata-symbol}."
 				},
-				"tokenURI(uint256)": {
-					"details": "See {IERC721Metadata-tokenURI}."
-				},
 				"transferFrom(address,address,uint256)": {
 					"details": "See {IERC721-transferFrom}."
 				}
@@ -473,6 +470,9 @@
 			"methods": {
 				"count()": {
 					"notice": "Internal count of wrappers"
+				},
+				"tokenURI(uint256)": {
+					"notice": "Just returns same wrapper NFT for every image"
 				},
 				"wrap(address[],uint256[])": {
 					"notice": "No direct erc721 native support, just wrap 721 in an erc20 to support"
@@ -578,10 +578,11 @@
 			]
 		},
 		"contracts/Wrapper.sol": {
-			"keccak256": "0xbc9469d88b4e4e6d851b39af9dd8b4ee552e9abf456571a4582ba0d99ae4c855",
+			"keccak256": "0x9cb5a79141aecc0fa4c8d135ea19380b7513bbd55d454b4091ddad76376d4494",
+			"license": "MIT",
 			"urls": [
-				"bzz-raw://26f3ca7b73bfbcdade939a3ddb50284aa00ac8a6fdffc1e8fd3e80f7cc863461",
-				"dweb:/ipfs/QmcxcMJmCHJiJFqSnHtvc8aUw9zoYBcidBNBWnSbpBHett"
+				"bzz-raw://4ca59deb7b0af2aa5ec85caf59b885783c80d8744e55673f1d12c57bf8d0b685",
+				"dweb:/ipfs/QmRxhcNzz9cTZRXwnXJNwoLAfQxMcQUPuCYXiYt4RBbsFJ"
 			]
 		}
 	},

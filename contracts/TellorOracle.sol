@@ -5,6 +5,8 @@ import "usingtellor/contracts/UsingTellor.sol";
 
 import "./IPriceOracle.sol";
 
+import "@openzeppelin/contracts/utils/math/Math.sol";
+
 interface IWrapper {
     function getAmounts(uint256 _nftId)
         external
@@ -15,6 +17,7 @@ interface IWrapper {
 }
 
 contract TellorOracle is IPriceOracle, UsingTellor {
+    using Math for uint256;
     /// @notice mapping the asset address to the bytes32 for tellor
     mapping(address => string) tAddressMapping;
     event Log(string message);
@@ -28,7 +31,7 @@ contract TellorOracle is IPriceOracle, UsingTellor {
     }
 
     function getBundlePrice(address wrapper, uint256 nftId)
-        external
+        external view
         returns (uint256)
     {
         /// @notice If it's say a BAYC and not a wrapper, getUnderlyingPrice
@@ -39,21 +42,17 @@ contract TellorOracle is IPriceOracle, UsingTellor {
         uint256 totalPriceUSD; // 18 decimal places
         uint256 length = tokens.length;
 
-        for (uint256 i = 0; i < length; ) {
+        for (uint256 i = 0; i < length; i++) {
             // getUnderlyingPrice returns price in 18 decimals and USD
 
             //the interface states that it should return zero when the price is unavailable.
             // function getUnderlyingPrice(address underlying,address quote) external view returns (uint256);
 
-            uint256 underlyingPrice = _getUnderlyingPrice(wrapper);
+            uint256 underlyingPrice = _getUnderlyingPrice(tokens[i]);
 
             if (underlyingPrice == 0) {
-                totalPriceUSD += underlyingPrice;
-                ++i;
-            } else {
-                emit Log("Tellor call failed for this asset");
-                //No revert if Tellor call fails since there is no oracle for asset
-            }
+                totalPriceUSD += underlyingPrice.mulDiv(amounts[i], 1e18);
+            } 
         }
         return totalPriceUSD;
     }
@@ -67,11 +66,11 @@ contract TellorOracle is IPriceOracle, UsingTellor {
     }
 
     // default return type is USD price for collateral. Will fail if there deosn't exist a USD price
-    function setMapping(address tokenAddress, string assetName) external view {
+    function setMapping(address tokenAddress, string calldata assetName) external {
         tAddressMapping[tokenAddress] = assetName;
     }
 
-    function _getUnderlyingPrice(string memory _address)
+    function _getUnderlyingPrice(address _address)
         internal
         view
         returns (uint256 price)
@@ -83,17 +82,17 @@ contract TellorOracle is IPriceOracle, UsingTellor {
         );
         bytes32 _queryId = keccak256(_queryData);
         (bool ifRetrieve, bytes memory _value, ) = getCurrentValue(_queryId);
-        if (!ifRetrieve) return "0x";
-        return asciiToInteger(_value);
+        if (!ifRetrieve) return 0;
+        return toUint256(_value);
     }
 
-    function asciiToInteger(bytes32 x) internal pure returns (uint256) {
-        uint256 y;
-        for (uint256 i = 0; i < 32; i++) {
-            uint256 c = (uint256(x) >> (i * 8)) & 0xff;
-            if (48 <= c && c <= 57) y += (c - 48) * 10**i;
-            else break;
-        }
-        return y;
+    function toUint256(bytes memory _bytes)   
+  internal
+  pure
+  returns (uint256 value) {
+
+    assembly {
+      value := mload(add(_bytes, 0x20))
     }
+}
 }

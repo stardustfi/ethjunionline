@@ -3,8 +3,9 @@ pragma solidity ^0.8.16;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/access/ownable.sol";
-import "./contracts/DutchAuction.sol";
-import "./contracts/ERC4626.sol";
+import "@openzeppelin/contracts/utils/math/Math.sol";
+import "./DutchAuction.sol";
+import "./ERC4626.sol";
 
 /// @notice Base implementation of BaseBid, similar to Compound V3
 /// @title BaseBid1
@@ -25,22 +26,22 @@ interface ILan {
         uint256 _amount,
         uint256 _apr,
         uint16 _ltv
-    ) external {}
+    ) external;
 
-    function liquidate(uint256 _poolId) external {}
+    function liquidate(uint256 _poolId) external;
 }
 
 interface IWrapper {
     function getAmounts(uint256 _nftId)
         public
         view
-        returns (uint256[] memory)
-    {}
+        returns (uint256[] memory);
 
-    function getTokens(uint256 _nftId) public view returns (address[] memory) {}
+    function getTokens(uint256 _nftId) public view returns (address[] memory);
 }
 
-contract BaseBid1 is BaseBidding, ERC4626, DutchAuction {
+contract BaseBid1 is BaseBidding, ERC4626, DutchAuction, ownable {
+    using Math for uint256;
     event newLoan(
         address collectionAddress,
         uint16 apr,
@@ -231,20 +232,19 @@ contract BaseBid1 is BaseBidding, ERC4626, DutchAuction {
     ) internal returns (uint256) {
         address[] memory tokens = Wrapper.getTokens(nftId);
         uint256[] memory amounts = Wrapper.getAmounts(nftId);
-        whitelists[tokens[i]];
+
         // loop through all assets and calculate borrowable USD
         uint256 borrowableUSD; // 18 decimal places
         uint256 length = tokens.length;
         for (uint256 i = 0; i < length; ) {
-            Whitelist memory whitelist = whitelists[tokens[i]];
+            Term memory whitelist = whitelists[tokens[i]];
             // Check if token is on whitelist - skip if not
             if (whitelist.oracle != address(0)) {
                 // getUnderlyingPrice returns price in 18 decimals and USD
                 uint256 collateralPrice = IPriceOracle(whitelist.oracle)
                     .getUnderlyingPrice(tokens[i]);
-                borrowableUSD +=
-                    (amounts[i] * whitelist[token].LTV * collateralPrice) /
-                    10**26;
+                uint256 ltvAmt = amounts[i].mulDiv(whitelist[tokens[i]].LTV, 1e18);
+                borrowableUSD += ltvAmt.mulDiv(collateralPrice, 1e18);
             }
             unchecked {
                 ++i;

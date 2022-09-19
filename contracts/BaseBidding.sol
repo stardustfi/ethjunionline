@@ -3,10 +3,13 @@ pragma solidity ^0.8.16;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/utils/math/Math.sol";
+
 //import "/contracts/mainliquidations.sol";
 
-interface ILAN {
+interface ILan {
     struct Loan {
+
         address owner;
         address token;
         address operator;
@@ -22,12 +25,19 @@ interface ILAN {
         // True if whitelisted mode on, False if not
         bool whitelisted;
     }
-    /// @notice Keeping track of loans. PoolId => loans
-    mapping(uint256 => Loan) public loans;
+    function bid(
+        uint256 _poolId,
+        uint256 _amount,
+        uint256 _apr,
+        uint16 _ltv
+    ) external;
+
+    function liquidate(uint256 _poolId) external;
 
 }
 
 abstract contract BaseBidding {
+    using Math for uint256;
     event newLoan(
         address collectionAddress,
         uint16 apr,
@@ -79,7 +89,7 @@ abstract contract BaseBidding {
         admin = _admin;
         baseAsset = _baseAsset;
         baseAssetOracle = _baseAssetOracle;
-        LAN = _LANContract;
+        LAN = ILan(_LANContract);
         liquidationOnly = _liquidationOnly;
         minAPR = _minAPR;
         longestTerm = _longestTerm;
@@ -125,7 +135,10 @@ abstract contract BaseBidding {
     /// @param _apr The APR of the loan
     /// @return futurevalue The final accrued value of the loan
     function _calculateLoanValue(uint256 _presentValue, uint256 _apr, uint256 _timeElapsed) public pure virtual returns(uint256) {
-        return _presentValue + _presentValue * _apr / 10 ** 18 * _timeElapsed / SECONDS_IN_ONE_YEAR;
+        return
+            _presentValue +
+            _presentValue.mulDiv(_apr, 10e18).mulDiv(_timeElapsed, SECONDS_IN_ONE_YEAR);
+
     }
     
     /// @notice Read LAN for Loan details
@@ -144,6 +157,7 @@ abstract contract BaseBidding {
         bool liquidatable,
         bool whitelisted) 
         {
-        return(LANContracts.loans(_poolId));
+        return(LAN.loans(_poolId));
+        //not sure how to read a struct through a mapping from another contract without inheritance
     }
 }

@@ -1,0 +1,441 @@
+{
+	"compiler": {
+		"version": "0.8.17+commit.8df45f5f"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [
+					{
+						"internalType": "address payable",
+						"name": "_tellorAddress",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "_wrapper",
+						"type": "address"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "constructor"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "string",
+						"name": "message",
+						"type": "string"
+					}
+				],
+				"name": "Log",
+				"type": "event"
+			},
+			{
+				"inputs": [],
+				"name": "Wrapper",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "wrapper",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "nftId",
+						"type": "uint256"
+					}
+				],
+				"name": "getBundlePrice",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "_queryId",
+						"type": "bytes32"
+					}
+				],
+				"name": "getCurrentValue",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "_ifRetrieve",
+						"type": "bool"
+					},
+					{
+						"internalType": "bytes",
+						"name": "_value",
+						"type": "bytes"
+					},
+					{
+						"internalType": "uint256",
+						"name": "_timestampRetrieved",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "_queryId",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "uint256",
+						"name": "_timestamp",
+						"type": "uint256"
+					}
+				],
+				"name": "getDataBefore",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "_ifRetrieve",
+						"type": "bool"
+					},
+					{
+						"internalType": "bytes",
+						"name": "_value",
+						"type": "bytes"
+					},
+					{
+						"internalType": "uint256",
+						"name": "_timestampRetrieved",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "_queryId",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "uint256",
+						"name": "_timestamp",
+						"type": "uint256"
+					}
+				],
+				"name": "getIndexForDataBefore",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "_found",
+						"type": "bool"
+					},
+					{
+						"internalType": "uint256",
+						"name": "_index",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "_queryId",
+						"type": "bytes32"
+					}
+				],
+				"name": "getNewValueCountbyQueryId",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "_queryId",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "uint256",
+						"name": "_index",
+						"type": "uint256"
+					}
+				],
+				"name": "getTimestampbyQueryIdandIndex",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "_underlying",
+						"type": "address"
+					}
+				],
+				"name": "getUnderlyingPrice",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "_queryId",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "uint256",
+						"name": "_timestamp",
+						"type": "uint256"
+					}
+				],
+				"name": "isInDispute",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "_queryId",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "uint256",
+						"name": "_timestamp",
+						"type": "uint256"
+					}
+				],
+				"name": "retrieveData",
+				"outputs": [
+					{
+						"internalType": "bytes",
+						"name": "",
+						"type": "bytes"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "tokenAddress",
+						"type": "address"
+					},
+					{
+						"internalType": "string",
+						"name": "assetName",
+						"type": "string"
+					}
+				],
+				"name": "setMapping",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "tellor",
+				"outputs": [
+					{
+						"internalType": "contract ITellor",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {
+				"getCurrentValue(bytes32)": {
+					"details": "Allows the user to get the latest value for the queryId specified",
+					"params": {
+						"_queryId": "is the id to look up the value for"
+					},
+					"returns": {
+						"_ifRetrieve": "bool true if non-zero value successfully retrieved",
+						"_timestampRetrieved": "the retrieved value's timestamp",
+						"_value": "the value retrieved"
+					}
+				},
+				"getDataBefore(bytes32,uint256)": {
+					"details": "Retrieves the latest value for the queryId before the specified timestamp",
+					"params": {
+						"_queryId": "is the queryId to look up the value for",
+						"_timestamp": "before which to search for latest value"
+					},
+					"returns": {
+						"_ifRetrieve": "bool true if able to retrieve a non-zero value",
+						"_timestampRetrieved": "the value's timestamp",
+						"_value": "the value retrieved"
+					}
+				},
+				"getIndexForDataBefore(bytes32,uint256)": {
+					"details": "Retrieves latest array index of data before the specified timestamp for the queryId",
+					"params": {
+						"_queryId": "is the queryId to look up the index for",
+						"_timestamp": "is the timestamp before which to search for the latest index"
+					},
+					"returns": {
+						"_found": "whether the index was found",
+						"_index": "the latest index found before the specified timestamp"
+					}
+				},
+				"getNewValueCountbyQueryId(bytes32)": {
+					"details": "Counts the number of values that have been submitted for the queryId",
+					"params": {
+						"_queryId": "the id to look up"
+					},
+					"returns": {
+						"_0": "uint256 count of the number of values received for the queryId"
+					}
+				},
+				"isInDispute(bytes32,uint256)": {
+					"details": "Determines whether a value with a given queryId and timestamp has been disputed",
+					"params": {
+						"_queryId": "is the value id to look up",
+						"_timestamp": "is the timestamp of the value to look up"
+					},
+					"returns": {
+						"_0": "bool true if queryId/timestamp is under dispute"
+					}
+				},
+				"retrieveData(bytes32,uint256)": {
+					"details": "Retrieve value from oracle based on queryId/timestamp",
+					"params": {
+						"_queryId": "being requested",
+						"_timestamp": "to retrieve data/value from"
+					},
+					"returns": {
+						"_0": "bytes value for query/timestamp submitted"
+					}
+				}
+			},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"contracts/TellorOracle.sol": "TellorOracle"
+		},
+		"evmVersion": "london",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"@openzeppelin/contracts/utils/math/Math.sol": {
+			"keccak256": "0xd15c3e400531f00203839159b2b8e7209c5158b35618f570c695b7e47f12e9f0",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://b600b852e0597aa69989cc263111f02097e2827edc1bdc70306303e3af5e9929",
+				"dweb:/ipfs/QmU4WfM28A1nDqghuuGeFmN3CnVrk6opWtiF65K4vhFPeC"
+			]
+		},
+		"contracts/IPriceOracle.sol": {
+			"keccak256": "0xdabed1b1214f7f821fb9833d6d5eb4b92ac18eacb5db83222235eaf9fb17e24d",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://63fb1f83980a5e691e8066322a18202d004191c536af9360d8d612a8915a1f45",
+				"dweb:/ipfs/QmSZ6bwaEjRsCeYnmbkYgY6ZSW3pqmXYPE7jLv2WBqCo5W"
+			]
+		},
+		"contracts/TellorOracle.sol": {
+			"keccak256": "0x4f173f4a40c1f1d7535bc8e3a2559135b866e9a67bb67dc4c1bcff20d4c9ecd2",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://356c672a64cef4dcd1155b01f7c26ac4f3030fb3fbf8ee725f87d2f5c987802f",
+				"dweb:/ipfs/QmRt7PtkxcinrtW8BraZJwbnt1NvpFsVNSdxuea5qcVjjX"
+			]
+		},
+		"usingtellor/contracts/UsingTellor.sol": {
+			"keccak256": "0x92f27d93725f4bbda8434d00f4eaceacf9b590e6a668607cf832d2490d095b9c",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://c229768f6909ab94b7b3a2dfa1980977d89513b84b02ac170851913459b4808f",
+				"dweb:/ipfs/QmdHnNLQbDJML5ENDMybf7UNSkgpiKegWkoDP47syz2xdj"
+			]
+		},
+		"usingtellor/contracts/interface/ITellor.sol": {
+			"keccak256": "0xa5a51f40da64e5049b95fe53a77bfcf751d87107cca29906a1c8bd35b28e9001",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://6e7290418621dacc2fe85c4715d6e627b60d3ecef6c424e1e8c6ee66e3b27969",
+				"dweb:/ipfs/QmNmEdmUGpTq6hGwQd7pMhAg42pV5ypaFvhLxCrVPB8wRE"
+			]
+		}
+	},
+	"version": 1
+}
