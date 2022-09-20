@@ -9,7 +9,6 @@ import "@openzeppelin/contracts/utils/math/Math.sol";
 
 interface ILan {
     struct Loan {
-
         address owner;
         address token;
         address operator;
@@ -33,7 +32,21 @@ interface ILan {
     ) external;
 
     function liquidate(uint256 _poolId) external;
-
+    
+    function getLoan(uint256 _poolId) external view returns(
+        address owner, 
+        address token, 
+        address operator,
+        address oracleAddress,        
+        address collectionAddress, 
+        uint256 apr, 
+        uint256 nftId, 
+        uint256 startTime, 
+        uint256 endTime, 
+        uint256 numBids,
+        bool liquidatable,
+        bool whitelisted) ;
+    
 }
 
 abstract contract BaseBidding {
@@ -140,7 +153,7 @@ abstract contract BaseBidding {
             _presentValue.mulDiv(_apr, 10e18).mulDiv(_timeElapsed, SECONDS_IN_ONE_YEAR);
 
     }
-    
+     
     /// @notice Read LAN for Loan details
     /// @param _poolId The pool ID
     function readLoan(uint256 _poolId) view virtual external returns(
@@ -149,15 +162,15 @@ abstract contract BaseBidding {
         address operator,
         address oracleAddress,        
         address collectionAddress, 
+        uint256 apr, 
         uint256 nftId, 
         uint256 startTime, 
         uint256 endTime, 
-        uint256 apr, 
         uint256 numBids,
         bool liquidatable,
         bool whitelisted) 
         {
-        return(LAN.loans(_poolId));
+        return(LAN.getLoan(_poolId));
         //not sure how to read a struct through a mapping from another contract without inheritance
     }
 }

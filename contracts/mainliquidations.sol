@@ -2,7 +2,7 @@
 pragma solidity ^0.8.16;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "./contracts/IPriceOracle.sol";
+import "./IPriceOracle.sol";
 
 // import "/contracts/IPriceOracle. sol";
 
@@ -324,5 +324,38 @@ contract LAN {
 
     function _started(uint256 _poolId) internal view returns (bool) {
         return loans[_poolId].startTime < block.timestamp;
+    }
+
+    function getLoan(uint256 _poolId) external view returns (
+        address owner, 
+        address token, 
+        address operator,
+        address oracleAddress,        
+        address collectionAddress, 
+        uint256 apr, 
+        uint256 nftId, 
+        uint256 startTime, 
+        uint256 endTime, 
+        uint256 numBids,
+        bool liquidatable,
+        bool whitelisted){
+
+            Loan memory loan = loans[_poolId];
+            
+        return 
+        (
+        loan.owner, 
+        loan.token, 
+        loan.operator,
+        loan.oracleAddress,        
+        loan.collectionAddress, 
+        loan.apr, 
+        loan.nftId, 
+        loan.startTime, 
+        loan.endTime, 
+        loan.numBids,
+        loan.liquidatable,
+        loan.whitelisted)
+        ;
     }
 }
