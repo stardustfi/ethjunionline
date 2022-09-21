@@ -3,6 +3,7 @@ pragma solidity ^0.8.16;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/access/ownable.sol";
+import {IPool} from "@aave/core-v3/contracts/interfaces/IPool.sol";
 import "./contracts/DutchAuction.sol";
 import "./contracts/ERC4626.sol";
 import {toDaysWadUnsafe, toWadUnsafe} from "solmate/utils/SignedWadMath.sol";
@@ -50,11 +51,13 @@ contract BaseBid1 is BaseBidding, ERC4626, DutchAuction, LogisticVRGDA {
     );
     event log(string reason);
 
+    address public immutable aavePool;
     address public immutable admin;
     address public immutable baseAsset;
     address public immutable baseAssetOracle;
     uint256 public immutable startTime = block.timestamp; // When VRGDA sales begun
     ILan public immutable LAN;
+    IPool public immutable pool;    
     uint16 public minAPY;
     uint16 public kink;
     bool public windDown;
@@ -86,6 +89,7 @@ contract BaseBid1 is BaseBidding, ERC4626, DutchAuction, LogisticVRGDA {
         address _baseAsset,
         address _baseAssetOracle,
         address _LANContract,
+        address _pool
         bool _liquidationOnly,
         uint16 _kink,
         uint256 _minAPR,
@@ -120,6 +124,7 @@ contract BaseBid1 is BaseBidding, ERC4626, DutchAuction, LogisticVRGDA {
         baseAsset = _baseAsset;
         baseAssetOracle = _baseAssetOracle;
         LAN = ILan(_LANcontract);
+        pool = IPool(_pool);
         kink = _kink;
         minAPY = _minAPY;
         windDown = false;
@@ -128,6 +133,7 @@ contract BaseBid1 is BaseBidding, ERC4626, DutchAuction, LogisticVRGDA {
         adminFee = _adminFee;
         windDown = false;
         //infinite token approval for LAN
+        IERC20(baseAsset).approve(_LANcontract, type(uint256).max);
         IERC20(baseAsset).approve(_LANcontract, type(uint256).max);
     }
 
@@ -178,7 +184,7 @@ contract BaseBid1 is BaseBidding, ERC4626, DutchAuction, LogisticVRGDA {
 
         uint256 shares = 1e18;
         _deposit(_msgSender(), receiver, assets, shares);
-
+        _supplyToAave(assets);
         return shares;
     }
 
@@ -244,13 +250,14 @@ contract BaseBid1 is BaseBidding, ERC4626, DutchAuction, LogisticVRGDA {
             _calculateLTV(nftId, endTime, _apr) >= _borrowAmount,
             "BaseBid: Borrow Amount too high"
         );
+        _withdrawFromAave(_borrowAmount);
         try LAN.bid(_poolId, _borrowAmount, apr) {
             emit newLoan(collectionAddress, apr, poolId, bidAmount);
             _utilization();
             amountPaid[_poolId] = _borrowAmount;
         } catch (string memory reason) {
+            _supplyToAave(_borrowAmount);
             emit log(reason);
-        }
     }
 
     /// @notice Sum the value of whitelisted assets contained in the NFT wrapper. Nonwhitelisted assets are 0.
@@ -302,18 +309,11 @@ contract BaseBid1 is BaseBidding, ERC4626, DutchAuction, LogisticVRGDA {
         bidWithParams(_poolId, _calculateLTV(nftId), apr);
     }
 
-    /// @notice Change the minAPR based on the # of assets deposited (cash), and # of assets currently inside (reserves)
-    function _utilization() internal view {
-        // compound Jump rate Model kinda
-        uint256 reserves = IERC20(baseAsset).balanceOf(address(this));
-        // totalsupply() is total supply of the shares
-        uint16 util = reserves / totalSupply();
-        if (util <= kink) {
-            // Increase minAPR with utilization linearly
-            minAPR += util * 10**19;
-        } else {
-            // Change linear slope by 10x
-            minAPR += util * 10**20;
-        }
+    function _supplyToAave(uint256 _amount) internal {
+        pool.supply(baseAsset, _amount, address(this), 0);
+    }
+
+    function _withdrawFromAave(uint256 _amount) internal {
+        pool.withdraw(baseAsset, _amount, address(this));
     }
 }

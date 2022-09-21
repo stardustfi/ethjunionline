@@ -4,7 +4,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/access/ownable.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
-//import '@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol';
+import "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
 import "./DutchAuction.sol";
 import "./ERC4626.sol";
 
@@ -52,6 +52,7 @@ contract BaseBid1 is BaseBidding, ERC4626, DutchAuction, ownable {
     address public immutable baseAsset;
     address public immutable baseAssetOracle;
     ILan public immutable LAN;
+    ISwapRouter public immutable router;
     uint16 public minAPY;
     bool public windDown;
     bool public liquidationOnly;
@@ -79,6 +80,7 @@ contract BaseBid1 is BaseBidding, ERC4626, DutchAuction, ownable {
         address _baseAsset,
         address _baseAssetOracle,
         address _LANContract,
+        address _router,
         bool _liquidationOnly,
         uint16 _kink,
         uint256 _minAPR,
@@ -106,6 +108,7 @@ contract BaseBid1 is BaseBidding, ERC4626, DutchAuction, ownable {
         baseAsset = _baseAsset;
         baseAssetOracle = _baseAssetOracle;
         LAN = ILan(_LANcontract);
+        router = ISwapRouter(_router);
         kink = _kink;
         minAPY = _minAPY;
         windDown = false;
@@ -284,25 +287,24 @@ contract BaseBid1 is BaseBidding, ERC4626, DutchAuction, ownable {
             minAPR += util * 10**20;
         }
     }
-    /*
-    // swap reserves for aTokens
-    function _swapforAtoken(bool direction) internal {
-        address aDAI = 0x028171bCA77440897B824Ca71D1c56caC55b68A3'
+
+    function _swapforYVtoken(bool direction) internal {
+        address yvDAI = 0x19D3364A399d251E894aC732651be8B0E4e85001;
         address[] path;
         if(bool){
-            path.push(aDAI)
+            path.push(yvToken)
             path.push(baseAsset)
         } else {
             path.push(baseAsset)
-            path.push(aDAI)
+            path.push(yvToken)
         }
         
-        swapExactTokensForTokens(
+        router.swapExactTokensForTokens(
             reserves,
             reserves,
             path,
             address(this),
             block.timestamp);
     }
-    */
+    
 }

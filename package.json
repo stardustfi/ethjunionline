@@ -6,8 +6,10 @@
     "prettier-plugin-solidity": "^1.0.0-beta.24"
   },
   "dependencies": {
+    "@aave/core-v3": "^1.16.2",
     "@connext/nxtp-contracts": "^0.2.0-beta.23",
     "@openzeppelin/contracts": "^4.7.3",
+    "@uniswap/v3-periphery": "^1.4.2",
     "dotenv": "^16.0.2",
     "solmate": "^6.6.1",
     "uniswap": "^0.0.1",
